@@ -1,5 +1,7 @@
 const API_HOST = (import.meta as any).env?.VITE_API_HOST;
-const BASE = API_HOST ? `http://${API_HOST}/api` : "/api";
+const BASE = API_HOST
+  ? `${window.location.protocol}//${API_HOST}/api`
+  : "/api";
 
 export class ApiError extends Error {
   status: number;

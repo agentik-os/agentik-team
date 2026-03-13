@@ -385,9 +385,9 @@ export async function startServer(): Promise<StartedServer> {
   }
   
   if (config.deploymentMode === "local_trusted" && !isLoopbackHost(config.host)) {
-    throw new Error(
-      `local_trusted mode requires loopback host binding (received: ${config.host}). ` +
-        "Use authenticated mode for non-loopback deployments.",
+    logger.warn(
+      `local_trusted mode with non-loopback host (${config.host}). ` +
+        "Ensure network-level access controls are in place.",
     );
   }
   
