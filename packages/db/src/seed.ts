@@ -11,10 +11,10 @@ console.log("Seeding database...");
 const [company] = await db
   .insert(companies)
   .values({
-    name: "Paperclip Demo Co",
+    name: "Agentik Team Demo Co",
     description: "A demo autonomous company",
     status: "active",
-    budgetMonthlyCents: 50000,
+    budgetMonthlyCents: 999999999,
   })
   .returning();
 
@@ -28,7 +28,7 @@ const [ceo] = await db
     status: "idle",
     adapterType: "process",
     adapterConfig: { command: "echo", args: ["hello from ceo"] },
-    budgetMonthlyCents: 15000,
+    budgetMonthlyCents: 999999999,
   })
   .returning();
 
@@ -43,7 +43,7 @@ const [engineer] = await db
     reportsTo: ceo!.id,
     adapterType: "process",
     adapterConfig: { command: "echo", args: ["hello from engineer"] },
-    budgetMonthlyCents: 10000,
+    budgetMonthlyCents: 999999999,
   })
   .returning();
 

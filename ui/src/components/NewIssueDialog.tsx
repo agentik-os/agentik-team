@@ -43,7 +43,7 @@ import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "./Ma
 import { AgentIcon } from "./AgentIconPicker";
 import { InlineEntitySelector, type InlineEntityOption } from "./InlineEntitySelector";
 
-const DRAFT_KEY = "paperclip:issue-draft";
+const DRAFT_KEY = "agentik:issue-draft";
 const DEBOUNCE_MS = 800;
 // TODO(issue-worktree-support): re-enable this UI once the workflow is ready to ship.
 const SHOW_EXPERIMENTAL_ISSUE_WORKTREE_UI = false;

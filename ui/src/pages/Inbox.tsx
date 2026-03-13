@@ -498,11 +498,8 @@ export function Inbox() {
 
   const hasRunFailures = failedRuns.length > 0;
   const showAggregateAgentError = !!dashboard && dashboard.agents.error > 0 && !hasRunFailures && !dismissed.has("alert:agent-errors");
-  const showBudgetAlert =
-    !!dashboard &&
-    dashboard.costs.monthBudgetCents > 0 &&
-    dashboard.costs.monthUtilizationPercent >= 80 &&
-    !dismissed.has("alert:budget");
+  // Budget alerts disabled — no budget enforcement
+  const showBudgetAlert = false;
   const hasAlerts = showAggregateAgentError || showBudgetAlert;
   const hasJoinRequests = joinRequests.length > 0;
   const hasTouchedIssues = touchedIssues.length > 0;

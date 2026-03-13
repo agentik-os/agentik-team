@@ -22,8 +22,8 @@ async function runGit(cwd: string, args: string[]) {
 async function createTempRepo() {
   const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-worktree-repo-"));
   await runGit(repoRoot, ["init"]);
-  await runGit(repoRoot, ["config", "user.email", "paperclip@example.com"]);
-  await runGit(repoRoot, ["config", "user.name", "Paperclip Test"]);
+  await runGit(repoRoot, ["config", "user.email", "agentik@example.com"]);
+  await runGit(repoRoot, ["config", "user.name", "Agentik Team Test"]);
   await fs.writeFile(path.join(repoRoot, "README.md"), "hello\n", "utf8");
   await runGit(repoRoot, ["add", "README.md"]);
   await runGit(repoRoot, ["commit", "-m", "Initial commit"]);
@@ -91,7 +91,7 @@ describe("realizeExecutionWorkspace", () => {
     expect(first.strategy).toBe("git_worktree");
     expect(first.created).toBe(true);
     expect(first.branchName).toBe("PAP-447-add-worktree-support");
-    expect(first.cwd).toContain(path.join(".paperclip", "worktrees"));
+    expect(first.cwd).toContain(path.join(".agentik", "worktrees"));
     await expect(fs.stat(path.join(first.cwd, ".git"))).resolves.toBeTruthy();
 
     const second = await realizeExecutionWorkspace({

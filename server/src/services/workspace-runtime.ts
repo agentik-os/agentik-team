@@ -194,7 +194,7 @@ function sanitizeBranchName(value: string): string {
     .replace(/[^A-Za-z0-9._/-]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^[-/.]+|[-/.]+$/g, "")
-    .slice(0, 120) || "paperclip-work";
+    .slice(0, 120) || "agentik-work";
 }
 
 function isAbsolutePath(value: string) {
@@ -362,7 +362,7 @@ export async function realizeExecutionWorkspace(input: {
   const configuredParentDir = asString(rawStrategy.worktreeParentDir, "");
   const worktreeParentDir = configuredParentDir
     ? resolveConfiguredPath(configuredParentDir, repoRoot)
-    : path.join(repoRoot, ".paperclip", "worktrees");
+    : path.join(repoRoot, ".agentik", "worktrees");
   const worktreePath = path.join(worktreeParentDir, branchName);
   const baseRef = asString(rawStrategy.baseRef, input.base.repoRef ?? "HEAD");
 

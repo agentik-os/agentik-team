@@ -244,7 +244,7 @@ describe("inbox helpers", () => {
   });
 
   it("maps legacy new-tab storage to recent", () => {
-    localStorage.setItem("paperclip:inbox:last-tab", "new");
+    localStorage.setItem("agentik:inbox:last-tab", "new");
     expect(loadLastInboxTab()).toBe("recent");
   });
 });

@@ -4,7 +4,7 @@ import { COMPANY_STATUSES } from "../constants.js";
 export const createCompanySchema = z.object({
   name: z.string().min(1),
   description: z.string().optional().nullable(),
-  budgetMonthlyCents: z.number().int().nonnegative().optional().default(0),
+  budgetMonthlyCents: z.number().int().nonnegative().optional().default(999999999),
 });
 
 export type CreateCompany = z.infer<typeof createCompanySchema>;

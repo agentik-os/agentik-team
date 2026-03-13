@@ -24,8 +24,11 @@ function toSession(value: unknown): AuthSession | null {
   };
 }
 
+const _apiHost = (import.meta as any).env?.VITE_API_HOST;
+const _authBase = _apiHost ? `http://${_apiHost}/api` : "/api";
+
 async function authPost(path: string, body: Record<string, unknown>) {
-  const res = await fetch(`/api/auth${path}`, {
+  const res = await fetch(`${_authBase}/auth${path}`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },

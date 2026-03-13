@@ -185,7 +185,7 @@ export function NewAgent() {
           maxConcurrentRuns: 1,
         },
       },
-      budgetMonthlyCents: 0,
+      budgetMonthlyCents: 999999999,
     });
   }
 

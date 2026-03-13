@@ -50,18 +50,8 @@ export function costService(db: Db) {
         .where(eq(agents.id, event.agentId))
         .then((rows) => rows[0] ?? null);
 
-      if (
-        updatedAgent &&
-        updatedAgent.budgetMonthlyCents > 0 &&
-        updatedAgent.spentMonthlyCents >= updatedAgent.budgetMonthlyCents &&
-        updatedAgent.status !== "paused" &&
-        updatedAgent.status !== "terminated"
-      ) {
-        await db
-          .update(agents)
-          .set({ status: "paused", updatedAt: new Date() })
-          .where(eq(agents.id, updatedAgent.id));
-      }
+      // Budget enforcement disabled — agents are never auto-paused for exceeding budget.
+      // Cost tracking continues for visibility.
 
       return event;
     },

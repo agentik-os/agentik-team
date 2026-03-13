@@ -91,7 +91,7 @@ const ADAPTER_DEFAULT_RULES_BY_TYPE: Record<string, Array<{ path: string[]; valu
     { path: ["timeoutSec"], value: 120 },
     { path: ["waitTimeoutMs"], value: 120000 },
     { path: ["sessionKeyStrategy"], value: "fixed" },
-    { path: ["sessionKey"], value: "paperclip" },
+    { path: ["sessionKey"], value: "agentik" },
     { path: ["role"], value: "operator" },
     { path: ["scopes"], value: ["operator.admin"] },
   ],
@@ -513,7 +513,7 @@ export function companyPortabilityService(db: Db) {
 
     const parsed = parseGitHubTreeUrl(source.url);
     let ref = parsed.ref;
-    const manifestRelativePath = [parsed.basePath, "paperclip.manifest.json"].filter(Boolean).join("/");
+    const manifestRelativePath = [parsed.basePath, "agentik.manifest.json"].filter(Boolean).join("/");
     let manifest: CompanyPortabilityManifest | null = null;
     const warnings: string[] = [];
     try {

@@ -182,7 +182,7 @@ function ProjectIssuesList({ projectId, companyId }: { projectId: string; compan
       agents={agents}
       liveIssueIds={liveIssueIds}
       projectId={projectId}
-      viewStateKey={`paperclip:project-view:${projectId}`}
+      viewStateKey={`agentik:project-view:${projectId}`}
       onUpdateIssue={(id, data) => updateIssue.mutate({ id, data })}
     />
   );

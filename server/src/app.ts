@@ -47,6 +47,22 @@ export async function createApp(
 ) {
   const app = express();
 
+  // CORS for external dashboard (Vercel deployment)
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+    }
+    if (req.method === "OPTIONS") {
+      res.status(204).end();
+      return;
+    }
+    next();
+  });
+
   app.use(express.json());
   app.use(httpLogger);
   const privateHostnameGateEnabled =
@@ -75,7 +91,7 @@ export async function createApp(
     }
     res.json({
       session: {
-        id: `paperclip:${req.actor.source}:${req.actor.userId}`,
+        id: `agentik:${req.actor.source}:${req.actor.userId}`,
         userId: req.actor.userId,
       },
       user: {
@@ -142,7 +158,7 @@ export async function createApp(
         res.status(200).set("Content-Type", "text/html").end(indexHtml);
       });
     } else {
-      console.warn("[paperclip] UI dist not found; running in API-only mode");
+      console.warn("[agentik-team] UI dist not found; running in API-only mode");
     }
   }
 
