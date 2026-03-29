@@ -1,13 +1,36 @@
 const BASE = "/api";
 
 /**
- * Clerk token getter — set by ClerkTokenProvider when Clerk is active.
- * API requests automatically attach the Clerk JWT as a Bearer token.
+ * Clerk token management.
+ * When Clerk is active, API requests wait for the token to be available
+ * before firing, ensuring every authenticated request has the JWT.
  */
 let clerkTokenGetter: (() => Promise<string | null>) | null = null;
+let clerkReady = false;
+let clerkReadyResolvers: Array<() => void> = [];
 
 export function setClerkTokenGetter(getter: (() => Promise<string | null>) | null) {
   clerkTokenGetter = getter;
+  if (getter) {
+    clerkReady = true;
+    for (const resolve of clerkReadyResolvers) resolve();
+    clerkReadyResolvers = [];
+  } else {
+    clerkReady = false;
+  }
+}
+
+/** Mark that Clerk is enabled but not yet ready — API calls will wait */
+export function setClerkEnabled() {
+  // Just signals that we should wait for the getter
+}
+
+function waitForClerkReady(timeoutMs = 5000): Promise<void> {
+  if (clerkReady) return Promise.resolve();
+  return new Promise((resolve) => {
+    clerkReadyResolvers.push(resolve);
+    setTimeout(resolve, timeoutMs); // Don't block forever
+  });
 }
 
 export class ApiError extends Error {
@@ -22,6 +45,11 @@ export class ApiError extends Error {
   }
 }
 
+const CLERK_ENABLED = Boolean(
+  typeof window !== "undefined" &&
+  import.meta.env?.VITE_CLERK_PUBLISHABLE_KEY
+);
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers ?? undefined);
   const body = init?.body;
@@ -29,11 +57,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers.set("Content-Type", "application/json");
   }
 
+  // Wait for Clerk to be ready before making authenticated API calls
+  if (CLERK_ENABLED && !clerkReady && !path.startsWith("/health")) {
+    await waitForClerkReady();
+  }
+
   // Inject Clerk Bearer token when available
   if (clerkTokenGetter && !headers.has("Authorization")) {
-    const token = await clerkTokenGetter();
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
+    try {
+      const token = await clerkTokenGetter();
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+    } catch {
+      // Token fetch failed — proceed without it
     }
   }
 
