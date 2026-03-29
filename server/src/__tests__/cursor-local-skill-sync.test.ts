@@ -19,7 +19,7 @@ async function createSkillDir(root: string, name: string) {
 }
 
 describe("cursor local skill sync", () => {
-  const paperclipKey = "agentik-os/agentik-team/paperclip";
+  const agentikKey = "agentik-os/agentik-team/agentik";
   const cleanupDirs = new Set<string>();
 
   afterEach(async () => {
@@ -28,7 +28,7 @@ describe("cursor local skill sync", () => {
   });
 
   it("reports configured Paperclip skills and installs them into the Cursor skills home", async () => {
-    const home = await makeTempDir("paperclip-cursor-skill-sync-");
+    const home = await makeTempDir("agentik-cursor-skill-sync-");
     cleanupDirs.add(home);
 
     const ctx = {
@@ -40,29 +40,29 @@ describe("cursor local skill sync", () => {
           HOME: home,
         },
         paperclipSkillSync: {
-          desiredSkills: [paperclipKey],
+          desiredSkills: [agentikKey],
         },
       },
     } as const;
 
     const before = await listCursorSkills(ctx);
     expect(before.mode).toBe("persistent");
-    expect(before.desiredSkills).toContain(paperclipKey);
-    expect(before.entries.find((entry) => entry.key === paperclipKey)?.required).toBe(true);
-    expect(before.entries.find((entry) => entry.key === paperclipKey)?.state).toBe("missing");
+    expect(before.desiredSkills).toContain(agentikKey);
+    expect(before.entries.find((entry) => entry.key === agentikKey)?.required).toBe(true);
+    expect(before.entries.find((entry) => entry.key === agentikKey)?.state).toBe("missing");
 
-    const after = await syncCursorSkills(ctx, [paperclipKey]);
-    expect(after.entries.find((entry) => entry.key === paperclipKey)?.state).toBe("installed");
-    expect((await fs.lstat(path.join(home, ".cursor", "skills", "paperclip"))).isSymbolicLink()).toBe(true);
+    const after = await syncCursorSkills(ctx, [agentikKey]);
+    expect(after.entries.find((entry) => entry.key === agentikKey)?.state).toBe("installed");
+    expect((await fs.lstat(path.join(home, ".cursor", "skills", "agentik"))).isSymbolicLink()).toBe(true);
   });
 
   it("recognizes company-library runtime skills supplied outside the bundled Paperclip directory", async () => {
-    const home = await makeTempDir("paperclip-cursor-runtime-skills-home-");
-    const runtimeSkills = await makeTempDir("paperclip-cursor-runtime-skills-src-");
+    const home = await makeTempDir("agentik-cursor-runtime-skills-home-");
+    const runtimeSkills = await makeTempDir("agentik-cursor-runtime-skills-src-");
     cleanupDirs.add(home);
     cleanupDirs.add(runtimeSkills);
 
-    const paperclipDir = await createSkillDir(runtimeSkills, "paperclip");
+    const agentikDir = await createSkillDir(runtimeSkills, "agentik");
     const asciiHeartDir = await createSkillDir(runtimeSkills, "ascii-heart");
 
     const ctx = {
@@ -75,9 +75,9 @@ describe("cursor local skill sync", () => {
         },
         paperclipRuntimeSkills: [
           {
-            key: "paperclip",
-            runtimeName: "paperclip",
-            source: paperclipDir,
+            key: "agentik-team",
+            runtimeName: "agentik-team",
+            source: agentikDir,
             required: true,
             requiredReason: "Bundled Paperclip skills are always available for local adapters.",
           },
@@ -95,7 +95,7 @@ describe("cursor local skill sync", () => {
 
     const before = await listCursorSkills(ctx);
     expect(before.warnings).toEqual([]);
-    expect(before.desiredSkills).toEqual(["paperclip", "ascii-heart"]);
+    expect(before.desiredSkills).toEqual(["agentik-team", "ascii-heart"]);
     expect(before.entries.find((entry) => entry.key === "ascii-heart")?.state).toBe("missing");
 
     const after = await syncCursorSkills(ctx, ["ascii-heart"]);
@@ -105,7 +105,7 @@ describe("cursor local skill sync", () => {
   });
 
   it("keeps required bundled Paperclip skills installed even when the desired set is emptied", async () => {
-    const home = await makeTempDir("paperclip-cursor-skill-prune-");
+    const home = await makeTempDir("agentik-cursor-skill-prune-");
     cleanupDirs.add(home);
 
     const configuredCtx = {
@@ -117,12 +117,12 @@ describe("cursor local skill sync", () => {
           HOME: home,
         },
         paperclipSkillSync: {
-          desiredSkills: [paperclipKey],
+          desiredSkills: [agentikKey],
         },
       },
     } as const;
 
-    await syncCursorSkills(configuredCtx, [paperclipKey]);
+    await syncCursorSkills(configuredCtx, [agentikKey]);
 
     const clearedCtx = {
       ...configuredCtx,
@@ -137,8 +137,8 @@ describe("cursor local skill sync", () => {
     } as const;
 
     const after = await syncCursorSkills(clearedCtx, []);
-    expect(after.desiredSkills).toContain(paperclipKey);
-    expect(after.entries.find((entry) => entry.key === paperclipKey)?.state).toBe("installed");
-    expect((await fs.lstat(path.join(home, ".cursor", "skills", "paperclip"))).isSymbolicLink()).toBe(true);
+    expect(after.desiredSkills).toContain(agentikKey);
+    expect(after.entries.find((entry) => entry.key === agentikKey)?.state).toBe("installed");
+    expect((await fs.lstat(path.join(home, ".cursor", "skills", "agentik"))).isSymbolicLink()).toBe(true);
   });
 });

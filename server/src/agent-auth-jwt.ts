@@ -32,8 +32,8 @@ function jwtConfig() {
   return {
     secret,
     ttlSeconds: parseNumber(process.env.AGENTIK_AGENT_JWT_TTL_SECONDS, 60 * 60 * 48),
-    issuer: process.env.AGENTIK_AGENT_JWT_ISSUER ?? "paperclip",
-    audience: process.env.AGENTIK_AGENT_JWT_AUDIENCE ?? "paperclip-api",
+    issuer: process.env.AGENTIK_AGENT_JWT_ISSUER ?? "agentik-team",
+    audience: process.env.AGENTIK_AGENT_JWT_AUDIENCE ?? "agentik-team-api",
   };
 }
 

@@ -28,10 +28,10 @@ export interface ResolvedClientContext {
 export function addCommonClientOptions(command: Command, opts?: { includeCompany?: boolean }): Command {
   command
     .option("-c, --config <path>", "Path to Paperclip config file")
-    .option("-d, --data-dir <path>", "Paperclip data directory root (isolates state from ~/.paperclip)")
+    .option("-d, --data-dir <path>", "Agentik Team data directory root (isolates state from ~/.agentik-team)")
     .option("--context <path>", "Path to CLI context file")
     .option("--profile <name>", "CLI context profile name")
-    .option("--api-base <url>", "Base URL for the Paperclip API")
+    .option("--api-base <url>", "Base URL for the Agentik Team API")
     .option("--api-key <token>", "Bearer token for agent-authenticated calls")
     .option("--json", "Output raw JSON");
 

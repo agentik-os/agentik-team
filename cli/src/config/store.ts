@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { paperclipConfigSchema, type PaperclipConfig } from "./schema.js";
+import { agentikConfigSchema, type AgentikConfig } from "./schema.js";
 import {
   resolveDefaultConfigPath,
-  resolvePaperclipInstanceId,
+  resolveAgentikInstanceId,
 } from "./home.js";
 
 const DEFAULT_CONFIG_BASENAME = "config.json";
@@ -13,7 +13,7 @@ function findConfigFileFromAncestors(startDir: string): string | null {
   let currentDir = absoluteStartDir;
 
   while (true) {
-    const candidate = path.resolve(currentDir, ".paperclip", DEFAULT_CONFIG_BASENAME);
+    const candidate = path.resolve(currentDir, ".agentik-team", DEFAULT_CONFIG_BASENAME);
     if (fs.existsSync(candidate)) {
       return candidate;
     }
@@ -29,7 +29,7 @@ function findConfigFileFromAncestors(startDir: string): string | null {
 export function resolveConfigPath(overridePath?: string): string {
   if (overridePath) return path.resolve(overridePath);
   if (process.env.AGENTIK_CONFIG) return path.resolve(process.env.AGENTIK_CONFIG);
-  return findConfigFileFromAncestors(process.cwd()) ?? resolveDefaultConfigPath(resolvePaperclipInstanceId());
+  return findConfigFileFromAncestors(process.cwd()) ?? resolveDefaultConfigPath(resolveAgentikInstanceId());
 }
 
 function parseJson(filePath: string): unknown {
@@ -83,12 +83,12 @@ function formatValidationError(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-export function readConfig(configPath?: string): PaperclipConfig | null {
+export function readConfig(configPath?: string): AgentikConfig | null {
   const filePath = resolveConfigPath(configPath);
   if (!fs.existsSync(filePath)) return null;
   const raw = parseJson(filePath);
   const migrated = migrateLegacyConfig(raw);
-  const parsed = paperclipConfigSchema.safeParse(migrated);
+  const parsed = agentikConfigSchema.safeParse(migrated);
   if (!parsed.success) {
     throw new Error(`Invalid config at ${filePath}: ${formatValidationError(parsed.error)}`);
   }
@@ -96,7 +96,7 @@ export function readConfig(configPath?: string): PaperclipConfig | null {
 }
 
 export function writeConfig(
-  config: PaperclipConfig,
+  config: AgentikConfig,
   configPath?: string,
 ): void {
   const filePath = resolveConfigPath(configPath);

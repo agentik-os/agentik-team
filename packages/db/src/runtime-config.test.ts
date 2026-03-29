@@ -30,48 +30,48 @@ afterEach(() => {
 
 describe("resolveDatabaseTarget", () => {
   it("uses DATABASE_URL from process env first", () => {
-    process.env.DATABASE_URL = "postgres://env-user:env-pass@db.example.com:5432/paperclip";
+    process.env.DATABASE_URL = "postgres://env-user:env-pass@db.example.com:5432/agentik";
 
     const target = resolveDatabaseTarget();
 
     expect(target).toMatchObject({
       mode: "postgres",
-      connectionString: "postgres://env-user:env-pass@db.example.com:5432/paperclip",
+      connectionString: "postgres://env-user:env-pass@db.example.com:5432/agentik",
       source: "DATABASE_URL",
     });
   });
 
-  it("uses DATABASE_URL from repo-local .paperclip/.env", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "paperclip-db-runtime-"));
+  it("uses DATABASE_URL from repo-local .agentik-team/.env", () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "agentik-db-runtime-"));
     const projectDir = path.join(tempDir, "repo");
     fs.mkdirSync(projectDir, { recursive: true });
     process.chdir(projectDir);
     delete process.env.AGENTIK_CONFIG;
-    writeJson(path.join(projectDir, ".paperclip", "config.json"), {
+    writeJson(path.join(projectDir, ".agentik-team", "config.json"), {
       database: { mode: "embedded-postgres", embeddedPostgresPort: 54329 },
     });
     writeText(
-      path.join(projectDir, ".paperclip", ".env"),
-      'DATABASE_URL="postgres://file-user:file-pass@db.example.com:6543/paperclip"\n',
+      path.join(projectDir, ".agentik-team", ".env"),
+      'DATABASE_URL="postgres://file-user:file-pass@db.example.com:6543/agentik"\n',
     );
 
     const target = resolveDatabaseTarget();
 
     expect(target).toMatchObject({
       mode: "postgres",
-      connectionString: "postgres://file-user:file-pass@db.example.com:6543/paperclip",
-      source: "paperclip-env",
+      connectionString: "postgres://file-user:file-pass@db.example.com:6543/agentik",
+      source: "agentik-env",
     });
   });
 
   it("uses config postgres connection string when configured", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "paperclip-db-runtime-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "agentik-db-runtime-"));
     const configPath = path.join(tempDir, "instance", "config.json");
     process.env.AGENTIK_CONFIG = configPath;
     writeJson(configPath, {
       database: {
         mode: "postgres",
-        connectionString: "postgres://cfg-user:cfg-pass@db.example.com:5432/paperclip",
+        connectionString: "postgres://cfg-user:cfg-pass@db.example.com:5432/agentik",
       },
     });
 
@@ -79,19 +79,19 @@ describe("resolveDatabaseTarget", () => {
 
     expect(target).toMatchObject({
       mode: "postgres",
-      connectionString: "postgres://cfg-user:cfg-pass@db.example.com:5432/paperclip",
+      connectionString: "postgres://cfg-user:cfg-pass@db.example.com:5432/agentik",
       source: "config.database.connectionString",
     });
   });
 
   it("falls back to embedded postgres settings from config", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "paperclip-db-runtime-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "agentik-db-runtime-"));
     const configPath = path.join(tempDir, "instance", "config.json");
     process.env.AGENTIK_CONFIG = configPath;
     writeJson(configPath, {
       database: {
         mode: "embedded-postgres",
-        embeddedPostgresDataDir: "~/paperclip-test-db",
+        embeddedPostgresDataDir: "~/agentik-test-db",
         embeddedPostgresPort: 55444,
       },
     });
@@ -100,7 +100,7 @@ describe("resolveDatabaseTarget", () => {
 
     expect(target).toMatchObject({
       mode: "embedded-postgres",
-      dataDir: path.resolve(os.homedir(), "paperclip-test-db"),
+      dataDir: path.resolve(os.homedir(), "agentik-test-db"),
       port: 55444,
       source: "embedded-postgres@55444",
     });

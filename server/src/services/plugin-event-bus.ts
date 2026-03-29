@@ -1,5 +1,5 @@
 /**
- * PluginEventBus — typed in-process event bus for the Paperclip plugin system.
+ * PluginEventBus — typed in-process event bus for the Agentik Team plugin system.
  *
  * Responsibilities:
  * - Deliver core domain events to subscribing plugin workers (server-side).

@@ -2,7 +2,7 @@ import { readConfigFile } from "./config-file.js";
 import { existsSync, realpathSync } from "node:fs";
 import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
-import { resolvePaperclipEnvPath } from "./paths.js";
+import { resolveAgentikEnvPath } from "./paths.js";
 import { maybeRepairLegacyWorktreeConfigAndEnvFiles } from "./worktree-config.js";
 import {
   AUTH_BASE_URL_MODES,
@@ -42,7 +42,7 @@ function env(suffix: string): string | undefined {
   return envWithFallback(`AGENTIK_${suffix}`, `PAPERCLIP_${suffix}`);
 }
 
-const AGENTIK_ENV_FILE_PATH = resolvePaperclipEnvPath();
+const AGENTIK_ENV_FILE_PATH = resolveAgentikEnvPath();
 if (existsSync(AGENTIK_ENV_FILE_PATH)) {
   loadDotenv({ path: AGENTIK_ENV_FILE_PATH, override: false, quiet: true });
 }
@@ -130,7 +130,7 @@ export function loadConfig(): Config {
       fileStorage?.localDisk?.baseDir ??
       resolveDefaultStorageDir(),
   );
-  const storageS3Bucket = env("STORAGE_S3_BUCKET") ?? fileStorage?.s3?.bucket ?? "paperclip";
+  const storageS3Bucket = env("STORAGE_S3_BUCKET") ?? fileStorage?.s3?.bucket ?? "agentik-team";
   const storageS3Region = env("STORAGE_S3_REGION") ?? fileStorage?.s3?.region ?? "us-east-1";
   const storageS3Endpoint = env("STORAGE_S3_ENDPOINT") ?? fileStorage?.s3?.endpoint ?? undefined;
   const storageS3Prefix = env("STORAGE_S3_PREFIX") ?? fileStorage?.s3?.prefix ?? "";

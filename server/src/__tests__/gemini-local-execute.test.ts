@@ -11,7 +11,7 @@ const fs = require("node:fs");
 const capturePath = process.env.AGENTIK_TEST_CAPTURE_PATH;
 const payload = {
   argv: process.argv.slice(2),
-  paperclipEnvKeys: Object.keys(process.env)
+  agentikEnvKeys: Object.keys(process.env)
     .filter((key) => key.startsWith("AGENTIK_"))
     .sort(),
 };
@@ -41,12 +41,12 @@ console.log(JSON.stringify({
 
 type CapturePayload = {
   argv: string[];
-  paperclipEnvKeys: string[];
+  agentikEnvKeys: string[];
 };
 
 describe("gemini execute", () => {
-  it("passes prompt via --prompt and injects paperclip env vars", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-gemini-execute-"));
+  it("passes prompt via --prompt and injects agentik env vars", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-gemini-execute-"));
     const workspace = path.join(root, "workspace");
     const commandPath = path.join(root, "gemini");
     const capturePath = path.join(root, "capture.json");
@@ -80,7 +80,7 @@ describe("gemini execute", () => {
           env: {
             AGENTIK_TEST_CAPTURE_PATH: capturePath,
           },
-          promptTemplate: "Follow the paperclip heartbeat.",
+          promptTemplate: "Follow the agentik heartbeat.",
         },
         context: {},
         authToken: "run-jwt-token",
@@ -101,9 +101,9 @@ describe("gemini execute", () => {
       expect(capture.argv).toContain("yolo");
       const promptFlagIndex = capture.argv.indexOf("--prompt");
       const promptArg = promptFlagIndex >= 0 ? capture.argv[promptFlagIndex + 1] : "";
-      expect(promptArg).toContain("Follow the paperclip heartbeat.");
+      expect(promptArg).toContain("Follow the agentik heartbeat.");
       expect(promptArg).toContain("Paperclip runtime note:");
-      expect(capture.paperclipEnvKeys).toEqual(
+      expect(capture.agentikEnvKeys).toEqual(
         expect.arrayContaining([
           "AGENTIK_AGENT_ID",
           "AGENTIK_API_KEY",
@@ -128,7 +128,7 @@ describe("gemini execute", () => {
   });
 
   it("always passes --approval-mode yolo", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-gemini-yolo-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-gemini-yolo-"));
     const workspace = path.join(root, "workspace");
     const commandPath = path.join(root, "gemini");
     const capturePath = path.join(root, "capture.json");

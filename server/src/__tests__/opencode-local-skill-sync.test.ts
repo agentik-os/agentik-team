@@ -12,7 +12,7 @@ async function makeTempDir(prefix: string): Promise<string> {
 }
 
 describe("opencode local skill sync", () => {
-  const paperclipKey = "agentik-os/agentik-team/paperclip";
+  const agentikKey = "agentik-os/agentik-team/agentik";
   const cleanupDirs = new Set<string>();
 
   afterEach(async () => {
@@ -21,7 +21,7 @@ describe("opencode local skill sync", () => {
   });
 
   it("reports configured Paperclip skills and installs them into the shared Claude/OpenCode skills home", async () => {
-    const home = await makeTempDir("paperclip-opencode-skill-sync-");
+    const home = await makeTempDir("agentik-opencode-skill-sync-");
     cleanupDirs.add(home);
 
     const ctx = {
@@ -33,7 +33,7 @@ describe("opencode local skill sync", () => {
           HOME: home,
         },
         paperclipSkillSync: {
-          desiredSkills: [paperclipKey],
+          desiredSkills: [agentikKey],
         },
       },
     } as const;
@@ -41,17 +41,17 @@ describe("opencode local skill sync", () => {
     const before = await listOpenCodeSkills(ctx);
     expect(before.mode).toBe("persistent");
     expect(before.warnings).toContain("OpenCode currently uses the shared Claude skills home (~/.claude/skills).");
-    expect(before.desiredSkills).toContain(paperclipKey);
-    expect(before.entries.find((entry) => entry.key === paperclipKey)?.required).toBe(true);
-    expect(before.entries.find((entry) => entry.key === paperclipKey)?.state).toBe("missing");
+    expect(before.desiredSkills).toContain(agentikKey);
+    expect(before.entries.find((entry) => entry.key === agentikKey)?.required).toBe(true);
+    expect(before.entries.find((entry) => entry.key === agentikKey)?.state).toBe("missing");
 
-    const after = await syncOpenCodeSkills(ctx, [paperclipKey]);
-    expect(after.entries.find((entry) => entry.key === paperclipKey)?.state).toBe("installed");
-    expect((await fs.lstat(path.join(home, ".claude", "skills", "paperclip"))).isSymbolicLink()).toBe(true);
+    const after = await syncOpenCodeSkills(ctx, [agentikKey]);
+    expect(after.entries.find((entry) => entry.key === agentikKey)?.state).toBe("installed");
+    expect((await fs.lstat(path.join(home, ".claude", "skills", "agentik"))).isSymbolicLink()).toBe(true);
   });
 
   it("keeps required bundled Paperclip skills installed even when the desired set is emptied", async () => {
-    const home = await makeTempDir("paperclip-opencode-skill-prune-");
+    const home = await makeTempDir("agentik-opencode-skill-prune-");
     cleanupDirs.add(home);
 
     const configuredCtx = {
@@ -63,12 +63,12 @@ describe("opencode local skill sync", () => {
           HOME: home,
         },
         paperclipSkillSync: {
-          desiredSkills: [paperclipKey],
+          desiredSkills: [agentikKey],
         },
       },
     } as const;
 
-    await syncOpenCodeSkills(configuredCtx, [paperclipKey]);
+    await syncOpenCodeSkills(configuredCtx, [agentikKey]);
 
     const clearedCtx = {
       ...configuredCtx,
@@ -83,8 +83,8 @@ describe("opencode local skill sync", () => {
     } as const;
 
     const after = await syncOpenCodeSkills(clearedCtx, []);
-    expect(after.desiredSkills).toContain(paperclipKey);
-    expect(after.entries.find((entry) => entry.key === paperclipKey)?.state).toBe("installed");
-    expect((await fs.lstat(path.join(home, ".claude", "skills", "paperclip"))).isSymbolicLink()).toBe(true);
+    expect(after.desiredSkills).toContain(agentikKey);
+    expect(after.entries.find((entry) => entry.key === agentikKey)?.state).toBe("installed");
+    expect((await fs.lstat(path.join(home, ".claude", "skills", "agentik"))).isSymbolicLink()).toBe(true);
   });
 });

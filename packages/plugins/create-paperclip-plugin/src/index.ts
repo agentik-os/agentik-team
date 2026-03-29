@@ -96,7 +96,7 @@ function packLocalPackage(packagePath: string, outputDir: string): string {
   const packageName = packageJson.name ?? path.basename(packagePath);
   const packageVersion = packageJson.version ?? "0.0.0";
   const tarballFileName = `${packageName.replace(/^@/, "").replace("/", "-")}-${packageVersion}.tgz`;
-  const sdkBundleDir = path.join(outputDir, ".paperclip-sdk");
+  const sdkBundleDir = path.join(outputDir, ".agentik-sdk");
 
   fs.mkdirSync(sdkBundleDir, { recursive: true });
   execFileSync("pnpm", ["build"], { cwd: packagePath, stdio: "pipe" });
@@ -171,7 +171,7 @@ export function scaffoldPluginProject(options: ScaffoldPluginOptions): string {
       worker: "./dist/worker.js",
       ui: "./dist/ui/"
     },
-    keywords: ["paperclip", "plugin", category],
+    keywords: ["agentik", "plugin", category],
     author,
     license: "MIT",
     ...(packedSharedTarball
@@ -434,7 +434,7 @@ pnpm test
 \`\`\`
 
 ${sdkDependency.startsWith("file:")
-  ? `This scaffold snapshots \`@agentik-os/plugin-sdk\` and \`@agentik-os/shared\` from a local Paperclip checkout at:\n\n\`${toPosixPath(localSdkPath)}\`\n\nThe packed tarballs live in \`.paperclip-sdk/\` for local development. Before publishing this plugin, switch those dependencies to published package versions once they are available on npm.\n\n`
+  ? `This scaffold snapshots \`@agentik-os/plugin-sdk\` and \`@agentik-os/shared\` from a local Agentik Team checkout at:\n\n\`${toPosixPath(localSdkPath)}\`\n\nThe packed tarballs live in \`.agentik-sdk/\` for local development. Before publishing this plugin, switch those dependencies to published package versions once they are available on npm.\n\n`
   : ""}
 
 ## Install Into Paperclip
@@ -452,7 +452,7 @@ curl -X POST http://127.0.0.1:3100/api/plugins/install \\
 `,
   );
 
-  writeFile(path.join(outputDir, ".gitignore"), "dist\nnode_modules\n.paperclip-sdk\n");
+  writeFile(path.join(outputDir, ".gitignore"), "dist\nnode_modules\n.agentik-sdk\n");
 
   return outputDir;
 }
@@ -468,7 +468,7 @@ function runCli() {
   const pluginName = process.argv[2];
   if (!pluginName) {
     // eslint-disable-next-line no-console
-    console.error("Usage: create-agentik-plugin <name> [--template default|connector|workspace] [--output <dir>] [--sdk-path <paperclip-sdk-path>]");
+    console.error("Usage: create-agentik-plugin <name> [--template default|connector|workspace] [--output <dir>] [--sdk-path <agentik-sdk-path>]");
     process.exit(1);
   }
 

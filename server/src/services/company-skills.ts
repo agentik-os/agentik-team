@@ -28,7 +28,7 @@ import type {
 } from "@agentik-os/shared";
 import { normalizeAgentUrlKey } from "@agentik-os/shared";
 import { findServerAdapter } from "../adapters/index.js";
-import { resolvePaperclipInstanceRoot } from "../home-paths.js";
+import { resolveAgentikInstanceRoot } from "../home-paths.js";
 import { notFound, unprocessable } from "../errors.js";
 import { agentService } from "./agents.js";
 import { projectService } from "./projects.js";
@@ -243,10 +243,10 @@ function readCanonicalSkillKey(frontmatter: Record<string, unknown>, metadata: R
     ?? asString(metadata?.paperclipSkillKey),
   );
   if (direct) return direct;
-  const paperclip = isPlainRecord(metadata?.paperclip) ? metadata?.paperclip as Record<string, unknown> : null;
+  const agentikMeta = isPlainRecord(metadata?.paperclip) ? metadata?.paperclip as Record<string, unknown> : null;
   return normalizeSkillKey(
-    asString(paperclip?.skillKey)
-    ?? asString(paperclip?.key),
+    asString(agentikMeta?.skillKey)
+    ?? asString(agentikMeta?.key),
   );
 }
 
@@ -1279,7 +1279,7 @@ export async function findMissingLocalSkillIds(
 }
 
 function resolveManagedSkillsRoot(companyId: string) {
-  return path.resolve(resolvePaperclipInstanceRoot(), "skills", companyId);
+  return path.resolve(resolveAgentikInstanceRoot(), "skills", companyId);
 }
 
 function resolveLocalSkillFilePath(skill: CompanySkill, relativePath: string) {

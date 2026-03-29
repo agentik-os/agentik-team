@@ -13,7 +13,7 @@ const payload = {
   argv: process.argv.slice(2),
   prompt: fs.readFileSync(0, "utf8"),
   codexHome: process.env.CODEX_HOME || null,
-  paperclipEnvKeys: Object.keys(process.env)
+  agentikEnvKeys: Object.keys(process.env)
     .filter((key) => key.startsWith("AGENTIK_"))
     .sort(),
 };
@@ -32,7 +32,7 @@ type CapturePayload = {
   argv: string[];
   prompt: string;
   codexHome: string | null;
-  paperclipEnvKeys: string[];
+  agentikEnvKeys: string[];
 };
 
 type LogEntry = {
@@ -41,15 +41,15 @@ type LogEntry = {
 };
 
 describe("codex execute", () => {
-  it("uses a Paperclip-managed CODEX_HOME outside worktree mode while preserving shared auth and config", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-codex-execute-default-"));
+  it("uses an Agentik Team-managed CODEX_HOME outside worktree mode while preserving shared auth and config", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-codex-execute-default-"));
     const workspace = path.join(root, "workspace");
     const commandPath = path.join(root, "codex");
     const capturePath = path.join(root, "capture.json");
     const sharedCodexHome = path.join(root, "shared-codex-home");
-    const paperclipHome = path.join(root, "paperclip-home");
+    const agentikHome = path.join(root, "agentik-home");
     const managedCodexHome = path.join(
-      paperclipHome,
+      agentikHome,
       "instances",
       "default",
       "companies",
@@ -68,7 +68,7 @@ describe("codex execute", () => {
     const previousPaperclipInWorktree = process.env.AGENTIK_IN_WORKTREE;
     const previousCodexHome = process.env.CODEX_HOME;
     process.env.HOME = root;
-    process.env.AGENTIK_HOME = paperclipHome;
+    process.env.AGENTIK_HOME = agentikHome;
     delete process.env.AGENTIK_INSTANCE_ID;
     delete process.env.AGENTIK_IN_WORKTREE;
     process.env.CODEX_HOME = sharedCodexHome;
@@ -96,7 +96,7 @@ describe("codex execute", () => {
           env: {
             AGENTIK_TEST_CAPTURE_PATH: capturePath,
           },
-          promptTemplate: "Follow the paperclip heartbeat.",
+          promptTemplate: "Follow the agentik heartbeat.",
         },
         context: {},
         authToken: "run-jwt-token",
@@ -140,7 +140,7 @@ describe("codex execute", () => {
   });
 
   it("emits a command note that Codex auto-applies repo-scoped AGENTS.md files", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-codex-execute-notes-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-codex-execute-notes-"));
     const workspace = path.join(root, "workspace");
     const commandPath = path.join(root, "codex");
     const capturePath = path.join(root, "capture.json");
@@ -173,7 +173,7 @@ describe("codex execute", () => {
           env: {
             AGENTIK_TEST_CAPTURE_PATH: capturePath,
           },
-          promptTemplate: "Follow the paperclip heartbeat.",
+          promptTemplate: "Follow the agentik heartbeat.",
         },
         context: {},
         authToken: "run-jwt-token",
@@ -196,21 +196,21 @@ describe("codex execute", () => {
   });
 
   it("uses a worktree-isolated CODEX_HOME while preserving shared auth and config", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-codex-execute-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-codex-execute-"));
     const workspace = path.join(root, "workspace");
     const commandPath = path.join(root, "codex");
     const capturePath = path.join(root, "capture.json");
     const sharedCodexHome = path.join(root, "shared-codex-home");
-    const paperclipHome = path.join(root, "paperclip-home");
+    const agentikHome = path.join(root, "agentik-home");
     const isolatedCodexHome = path.join(
-      paperclipHome,
+      agentikHome,
       "instances",
       "worktree-1",
       "companies",
       "company-1",
       "codex-home",
     );
-    const homeSkill = path.join(isolatedCodexHome, "skills", "paperclip");
+    const homeSkill = path.join(isolatedCodexHome, "skills", "agentik");
     await fs.mkdir(workspace, { recursive: true });
     await fs.mkdir(sharedCodexHome, { recursive: true });
     await fs.writeFile(path.join(sharedCodexHome, "auth.json"), '{"token":"shared"}\n', "utf8");
@@ -223,7 +223,7 @@ describe("codex execute", () => {
     const previousPaperclipInWorktree = process.env.AGENTIK_IN_WORKTREE;
     const previousCodexHome = process.env.CODEX_HOME;
     process.env.HOME = root;
-    process.env.AGENTIK_HOME = paperclipHome;
+    process.env.AGENTIK_HOME = agentikHome;
     process.env.AGENTIK_INSTANCE_ID = "worktree-1";
     process.env.AGENTIK_IN_WORKTREE = "true";
     process.env.CODEX_HOME = sharedCodexHome;
@@ -251,7 +251,7 @@ describe("codex execute", () => {
           env: {
             AGENTIK_TEST_CAPTURE_PATH: capturePath,
           },
-          promptTemplate: "Follow the paperclip heartbeat.",
+          promptTemplate: "Follow the agentik heartbeat.",
         },
         context: {},
         authToken: "run-jwt-token",
@@ -266,8 +266,8 @@ describe("codex execute", () => {
       const capture = JSON.parse(await fs.readFile(capturePath, "utf8")) as CapturePayload;
       expect(capture.codexHome).toBe(isolatedCodexHome);
       expect(capture.argv).toEqual(expect.arrayContaining(["exec", "--json", "-"]));
-      expect(capture.prompt).toContain("Follow the paperclip heartbeat.");
-      expect(capture.paperclipEnvKeys).toEqual(
+      expect(capture.prompt).toContain("Follow the agentik heartbeat.");
+      expect(capture.agentikEnvKeys).toEqual(
         expect.arrayContaining([
           "AGENTIK_AGENT_ID",
           "AGENTIK_API_KEY",
@@ -294,7 +294,7 @@ describe("codex execute", () => {
       expect(logs).toContainEqual(
         expect.objectContaining({
           stream: "stdout",
-          chunk: expect.stringContaining('Injected Codex skill "paperclip"'),
+          chunk: expect.stringContaining('Injected Codex skill "agentik-team"'),
         }),
       );
     } finally {
@@ -313,13 +313,13 @@ describe("codex execute", () => {
   });
 
   it("respects an explicit CODEX_HOME config override even in worktree mode", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-codex-execute-explicit-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-codex-execute-explicit-"));
     const workspace = path.join(root, "workspace");
     const commandPath = path.join(root, "codex");
     const capturePath = path.join(root, "capture.json");
     const sharedCodexHome = path.join(root, "shared-codex-home");
     const explicitCodexHome = path.join(root, "explicit-codex-home");
-    const paperclipHome = path.join(root, "paperclip-home");
+    const agentikHome = path.join(root, "agentik-home");
     await fs.mkdir(workspace, { recursive: true });
     await fs.mkdir(sharedCodexHome, { recursive: true });
     await fs.writeFile(path.join(sharedCodexHome, "auth.json"), '{"token":"shared"}\n', "utf8");
@@ -331,7 +331,7 @@ describe("codex execute", () => {
     const previousPaperclipInWorktree = process.env.AGENTIK_IN_WORKTREE;
     const previousCodexHome = process.env.CODEX_HOME;
     process.env.HOME = root;
-    process.env.AGENTIK_HOME = paperclipHome;
+    process.env.AGENTIK_HOME = agentikHome;
     process.env.AGENTIK_INSTANCE_ID = "worktree-1";
     process.env.AGENTIK_IN_WORKTREE = "true";
     process.env.CODEX_HOME = sharedCodexHome;
@@ -359,7 +359,7 @@ describe("codex execute", () => {
             AGENTIK_TEST_CAPTURE_PATH: capturePath,
             CODEX_HOME: explicitCodexHome,
           },
-          promptTemplate: "Follow the paperclip heartbeat.",
+          promptTemplate: "Follow the agentik heartbeat.",
         },
         context: {},
         authToken: "run-jwt-token",
@@ -371,8 +371,8 @@ describe("codex execute", () => {
 
       const capture = JSON.parse(await fs.readFile(capturePath, "utf8")) as CapturePayload;
       expect(capture.codexHome).toBe(explicitCodexHome);
-      expect((await fs.lstat(path.join(explicitCodexHome, "skills", "paperclip"))).isSymbolicLink()).toBe(true);
-      await expect(fs.lstat(path.join(paperclipHome, "instances", "worktree-1", "codex-home"))).rejects.toThrow();
+      expect((await fs.lstat(path.join(explicitCodexHome, "skills", "agentik"))).isSymbolicLink()).toBe(true);
+      await expect(fs.lstat(path.join(agentikHome, "instances", "worktree-1", "codex-home"))).rejects.toThrow();
     } finally {
       if (previousHome === undefined) delete process.env.HOME;
       else process.env.HOME = previousHome;

@@ -452,7 +452,7 @@ describe("openclaw gateway adapter execute", () => {
       const payload = gateway.getAgentPayload();
       expect(payload).toBeTruthy();
       expect(payload?.idempotencyKey).toBe("run-123");
-      expect(payload?.sessionKey).toBe("paperclip:issue:issue-123");
+      expect(payload?.sessionKey).toBe("agentik-team:issue:issue-123");
       expect(String(payload?.message ?? "")).toContain("wake now");
       expect(String(payload?.message ?? "")).toContain("AGENTIK_RUN_ID=run-123");
       expect(String(payload?.message ?? "")).toContain("AGENTIK_TASK_ID=task-123");

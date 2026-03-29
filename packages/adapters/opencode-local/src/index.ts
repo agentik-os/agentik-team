@@ -41,7 +41,7 @@ Notes:
 - The adapter sets OPENCODE_DISABLE_PROJECT_CONFIG=true to prevent OpenCode from \
   writing an opencode.json config file into the project working directory. Model \
   selection is passed via the --model CLI flag instead.
-- When \`dangerouslySkipPermissions\` is enabled, Paperclip injects a temporary \
+- When \`dangerouslySkipPermissions\` is enabled, Agentik Team injects a temporary \
   runtime config with \`permission.external_directory=allow\` so headless runs do \
   not stall on approval prompts.
 `;

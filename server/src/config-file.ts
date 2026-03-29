@@ -1,15 +1,15 @@
 import fs from "node:fs";
-import { paperclipConfigSchema, type PaperclipConfig } from "@agentik-os/shared";
-import { resolvePaperclipConfigPath } from "./paths.js";
+import { agentikConfigSchema, type AgentikConfig } from "@agentik-os/shared";
+import { resolveAgentikConfigPath } from "./paths.js";
 
-export function readConfigFile(): PaperclipConfig | null {
-  const configPath = resolvePaperclipConfigPath();
+export function readConfigFile(): AgentikConfig | null {
+  const configPath = resolveAgentikConfigPath();
 
   if (!fs.existsSync(configPath)) return null;
 
   try {
     const raw = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-    return paperclipConfigSchema.parse(raw);
+    return agentikConfigSchema.parse(raw);
   } catch {
     return null;
   }

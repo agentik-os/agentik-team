@@ -152,15 +152,15 @@ function normalizeSkillKey(value: string | null | undefined) {
 
 function readSkillKey(frontmatter: Record<string, unknown>) {
   const metadata = isPlainRecord(frontmatter.metadata) ? frontmatter.metadata : null;
-  const paperclip = isPlainRecord(metadata?.paperclip) ? metadata?.paperclip as Record<string, unknown> : null;
+  const agentikMeta = isPlainRecord(metadata?.paperclip) ? metadata?.paperclip as Record<string, unknown> : null;
   return normalizeSkillKey(
     asString(frontmatter.key)
     ?? asString(frontmatter.skillKey)
     ?? asString(metadata?.skillKey)
     ?? asString(metadata?.canonicalKey)
     ?? asString(metadata?.paperclipSkillKey)
-    ?? asString(paperclip?.skillKey)
-    ?? asString(paperclip?.key),
+    ?? asString(agentikMeta?.skillKey)
+    ?? asString(agentikMeta?.key),
   );
 }
 
@@ -528,7 +528,7 @@ const ADAPTER_DEFAULT_RULES_BY_TYPE: Record<string, Array<{ path: string[]; valu
     { path: ["timeoutSec"], value: 120 },
     { path: ["waitTimeoutMs"], value: 120000 },
     { path: ["sessionKeyStrategy"], value: "fixed" },
-    { path: ["sessionKey"], value: "paperclip" },
+    { path: ["sessionKey"], value: "agentik-team" },
     { path: ["role"], value: "operator" },
     { path: ["scopes"], value: ["operator.admin"] },
   ],
@@ -1421,7 +1421,7 @@ function filterPortableExtensionYaml(yaml: string, selectedFiles: Set<string>) {
 function filterExportFiles(
   files: Record<string, CompanyPortabilityFileEntry>,
   selectedFilesInput: string[] | undefined,
-  paperclipExtensionPath: string,
+  agentikExtensionPath: string,
 ) {
   if (!selectedFilesInput || selectedFilesInput.length === 0) {
     return files;
@@ -1438,15 +1438,15 @@ function filterExportFiles(
     filtered[filePath] = content;
   }
 
-  const extensionEntry = filtered[paperclipExtensionPath];
-  if (selectedFiles.has(paperclipExtensionPath) && typeof extensionEntry === "string") {
-    filtered[paperclipExtensionPath] = filterPortableExtensionYaml(extensionEntry, selectedFiles);
+  const extensionEntry = filtered[agentikExtensionPath];
+  if (selectedFiles.has(agentikExtensionPath) && typeof extensionEntry === "string") {
+    filtered[agentikExtensionPath] = filterPortableExtensionYaml(extensionEntry, selectedFiles);
   }
 
   return filtered;
 }
 
-function findPaperclipExtensionPath(files: Record<string, CompanyPortabilityFileEntry>) {
+function findAgentikExtensionPath(files: Record<string, CompanyPortabilityFileEntry>) {
   if (typeof files[".paperclip.yaml"] === "string") return ".paperclip.yaml";
   if (typeof files[".paperclip.yml"] === "string") return ".paperclip.yml";
   return Object.keys(files).find((entry) => entry.endsWith("/.paperclip.yaml") || entry.endsWith("/.paperclip.yml")) ?? null;
@@ -2238,16 +2238,16 @@ function buildManifestFromPackageFiles(
   }
   const companyDoc = parseFrontmatterMarkdown(companyMarkdown);
   const companyFrontmatter = companyDoc.frontmatter;
-  const paperclipExtensionPath = findPaperclipExtensionPath(normalizedFiles);
-  const paperclipExtension = paperclipExtensionPath
-    ? parseYamlFile(readPortableTextFile(normalizedFiles, paperclipExtensionPath) ?? "")
+  const agentikExtensionPath = findAgentikExtensionPath(normalizedFiles);
+  const agentikExtension = agentikExtensionPath
+    ? parseYamlFile(readPortableTextFile(normalizedFiles, agentikExtensionPath) ?? "")
     : {};
-  const paperclipCompany = isPlainRecord(paperclipExtension.company) ? paperclipExtension.company : {};
-  const paperclipSidebar = normalizePortableSidebarOrder(paperclipExtension.sidebar);
-  const paperclipAgents = isPlainRecord(paperclipExtension.agents) ? paperclipExtension.agents : {};
-  const paperclipProjects = isPlainRecord(paperclipExtension.projects) ? paperclipExtension.projects : {};
-  const paperclipTasks = isPlainRecord(paperclipExtension.tasks) ? paperclipExtension.tasks : {};
-  const paperclipRoutines = isPlainRecord(paperclipExtension.routines) ? paperclipExtension.routines : {};
+  const agentikCompany = isPlainRecord(agentikExtension.company) ? agentikExtension.company : {};
+  const agentikSidebar = normalizePortableSidebarOrder(agentikExtension.sidebar);
+  const agentikAgents = isPlainRecord(agentikExtension.agents) ? agentikExtension.agents : {};
+  const agentikProjects = isPlainRecord(agentikExtension.projects) ? agentikExtension.projects : {};
+  const agentikTasks = isPlainRecord(agentikExtension.tasks) ? agentikExtension.tasks : {};
+  const agentikRoutines = isPlainRecord(agentikExtension.routines) ? agentikExtension.routines : {};
   const companyName =
     asString(companyFrontmatter.name)
     ?? opts?.sourceLabel?.companyName
@@ -2302,14 +2302,14 @@ function buildManifestFromPackageFiles(
       path: resolvedCompanyPath,
       name: companyName,
       description: asString(companyFrontmatter.description),
-      brandColor: asString(paperclipCompany.brandColor),
-      logoPath: asString(paperclipCompany.logoPath) ?? asString(paperclipCompany.logo),
+      brandColor: asString(agentikCompany.brandColor),
+      logoPath: asString(agentikCompany.logoPath) ?? asString(agentikCompany.logo),
       requireBoardApprovalForNewAgents:
-        typeof paperclipCompany.requireBoardApprovalForNewAgents === "boolean"
-          ? paperclipCompany.requireBoardApprovalForNewAgents
+        typeof agentikCompany.requireBoardApprovalForNewAgents === "boolean"
+          ? agentikCompany.requireBoardApprovalForNewAgents
           : readCompanyApprovalDefault(companyFrontmatter),
     },
-    sidebar: paperclipSidebar,
+    sidebar: agentikSidebar,
     agents: [],
     skills: [],
     projects: [],
@@ -2331,7 +2331,7 @@ function buildManifestFromPackageFiles(
     const frontmatter = agentDoc.frontmatter;
     const fallbackSlug = normalizeAgentUrlKey(path.posix.basename(path.posix.dirname(agentPath))) ?? "agent";
     const slug = asString(frontmatter.slug) ?? fallbackSlug;
-    const extension = isPlainRecord(paperclipAgents[slug]) ? paperclipAgents[slug] : {};
+    const extension = isPlainRecord(agentikAgents[slug]) ? agentikAgents[slug] : {};
     const extensionAdapter = isPlainRecord(extension.adapter) ? extension.adapter : null;
     const extensionRuntime = isPlainRecord(extension.runtime) ? extension.runtime : null;
     const extensionPermissions = isPlainRecord(extension.permissions) ? extension.permissions : null;
@@ -2468,7 +2468,7 @@ function buildManifestFromPackageFiles(
       projectPath,
     );
     const slug = asString(frontmatter.slug) ?? fallbackSlug;
-    const extension = isPlainRecord(paperclipProjects[slug]) ? paperclipProjects[slug] : {};
+    const extension = isPlainRecord(agentikProjects[slug]) ? agentikProjects[slug] : {};
     const workspaceExtensions = isPlainRecord(extension.workspaces) ? extension.workspaces : {};
     const workspaces = Object.entries(workspaceExtensions)
       .map(([workspaceKey, entry]) => normalizePortableProjectWorkspaceExtension(workspaceKey, entry))
@@ -2504,9 +2504,9 @@ function buildManifestFromPackageFiles(
     const frontmatter = taskDoc.frontmatter;
     const fallbackSlug = normalizeAgentUrlKey(path.posix.basename(path.posix.dirname(taskPath))) ?? "task";
     const slug = asString(frontmatter.slug) ?? fallbackSlug;
-    const extension = isPlainRecord(paperclipTasks[slug]) ? paperclipTasks[slug] : {};
-    const routineExtension = normalizeRoutineExtension(paperclipRoutines[slug]);
-    const routineExtensionRaw = isPlainRecord(paperclipRoutines[slug]) ? paperclipRoutines[slug] : {};
+    const extension = isPlainRecord(agentikTasks[slug]) ? agentikTasks[slug] : {};
+    const routineExtension = normalizeRoutineExtension(agentikRoutines[slug]);
+    const routineExtensionRaw = isPlainRecord(agentikRoutines[slug]) ? agentikRoutines[slug] : {};
     const schedule = isPlainRecord(frontmatter.schedule) ? frontmatter.schedule : null;
     const legacyRecurrence = schedule && isPlainRecord(schedule.recurrence)
       ? schedule.recurrence
@@ -2960,11 +2960,11 @@ export function companyPortabilityService(db: Db, storage?: StorageService) {
       }
     }
 
-    const paperclipAgentsOut: Record<string, Record<string, unknown>> = {};
-    const paperclipProjectsOut: Record<string, Record<string, unknown>> = {};
-    const paperclipTasksOut: Record<string, Record<string, unknown>> = {};
+    const agentikAgentsOut: Record<string, Record<string, unknown>> = {};
+    const agentikProjectsOut: Record<string, Record<string, unknown>> = {};
+    const agentikTasksOut: Record<string, Record<string, unknown>> = {};
     const unportableTaskWorkspaceRefs = new Map<string, { workspaceId: string; taskSlugs: string[] }>();
-    const paperclipRoutinesOut: Record<string, Record<string, unknown>> = {};
+    const agentikRoutinesOut: Record<string, Record<string, unknown>> = {};
 
     const skillByReference = new Map<string, typeof companySkillRows[number]>();
     for (const skill of companySkillRows) {
@@ -3090,7 +3090,7 @@ export function companyPortabilityService(db: Db, storage?: StorageService) {
             env: buildEnvInputMap(agentEnvInputs),
           };
         }
-        paperclipAgentsOut[slug] = isPlainRecord(extension) ? extension : {};
+        agentikAgentsOut[slug] = isPlainRecord(extension) ? extension : {};
       }
     }
 
@@ -3120,7 +3120,7 @@ export function companyPortabilityService(db: Db, storage?: StorageService) {
         ) ?? undefined,
         workspaces: portableWorkspaces.extension,
       });
-      paperclipProjectsOut[slug] = isPlainRecord(extension) ? extension : {};
+      agentikProjectsOut[slug] = isPlainRecord(extension) ? extension : {};
     }
 
     for (const issue of selectedIssueRows) {
@@ -3162,7 +3162,7 @@ export function companyPortabilityService(db: Db, storage?: StorageService) {
         executionWorkspaceSettings: issue.executionWorkspaceSettings ?? undefined,
         assigneeAdapterOverrides: issue.assigneeAdapterOverrides ?? undefined,
       });
-      paperclipTasksOut[taskSlug] = isPlainRecord(extension) ? extension : {};
+      agentikTasksOut[taskSlug] = isPlainRecord(extension) ? extension : {};
     }
 
     for (const { workspaceId, taskSlugs } of unportableTaskWorkspaceRefs.values()) {
@@ -3202,23 +3202,23 @@ export function companyPortabilityService(db: Db, storage?: StorageService) {
             : undefined,
         })),
       });
-      paperclipRoutinesOut[taskSlug] = isPlainRecord(extension) ? extension : {};
+      agentikRoutinesOut[taskSlug] = isPlainRecord(extension) ? extension : {};
     }
 
-    const paperclipExtensionPath = ".paperclip.yaml";
-    const paperclipAgents = Object.fromEntries(
-      Object.entries(paperclipAgentsOut).filter(([, value]) => isPlainRecord(value) && Object.keys(value).length > 0),
+    const agentikExtensionPath = ".paperclip.yaml";
+    const agentikAgents = Object.fromEntries(
+      Object.entries(agentikAgentsOut).filter(([, value]) => isPlainRecord(value) && Object.keys(value).length > 0),
     );
-    const paperclipProjects = Object.fromEntries(
-      Object.entries(paperclipProjectsOut).filter(([, value]) => isPlainRecord(value) && Object.keys(value).length > 0),
+    const agentikProjects = Object.fromEntries(
+      Object.entries(agentikProjectsOut).filter(([, value]) => isPlainRecord(value) && Object.keys(value).length > 0),
     );
-    const paperclipTasks = Object.fromEntries(
-      Object.entries(paperclipTasksOut).filter(([, value]) => isPlainRecord(value) && Object.keys(value).length > 0),
+    const agentikTasks = Object.fromEntries(
+      Object.entries(agentikTasksOut).filter(([, value]) => isPlainRecord(value) && Object.keys(value).length > 0),
     );
-    const paperclipRoutines = Object.fromEntries(
-      Object.entries(paperclipRoutinesOut).filter(([, value]) => isPlainRecord(value) && Object.keys(value).length > 0),
+    const agentikRoutines = Object.fromEntries(
+      Object.entries(agentikRoutinesOut).filter(([, value]) => isPlainRecord(value) && Object.keys(value).length > 0),
     );
-    files[paperclipExtensionPath] = buildYamlFile(
+    files[agentikExtensionPath] = buildYamlFile(
       {
         schema: "paperclip/v1",
         company: stripEmptyValues({
@@ -3227,15 +3227,15 @@ export function companyPortabilityService(db: Db, storage?: StorageService) {
           requireBoardApprovalForNewAgents: company.requireBoardApprovalForNewAgents ? undefined : false,
         }),
         sidebar: stripEmptyValues(sidebarOrder),
-        agents: Object.keys(paperclipAgents).length > 0 ? paperclipAgents : undefined,
-        projects: Object.keys(paperclipProjects).length > 0 ? paperclipProjects : undefined,
-        tasks: Object.keys(paperclipTasks).length > 0 ? paperclipTasks : undefined,
-        routines: Object.keys(paperclipRoutines).length > 0 ? paperclipRoutines : undefined,
+        agents: Object.keys(agentikAgents).length > 0 ? agentikAgents : undefined,
+        projects: Object.keys(agentikProjects).length > 0 ? agentikProjects : undefined,
+        tasks: Object.keys(agentikTasks).length > 0 ? agentikTasks : undefined,
+        routines: Object.keys(agentikRoutines).length > 0 ? agentikRoutines : undefined,
       },
       { preserveEmptyStrings: true },
     );
 
-    let finalFiles = filterExportFiles(files, input.selectedFiles, paperclipExtensionPath);
+    let finalFiles = filterExportFiles(files, input.selectedFiles, agentikExtensionPath);
     let resolved = buildManifestFromPackageFiles(finalFiles, {
       sourceLabel: {
         companyId: company.id,
@@ -3291,7 +3291,7 @@ export function companyPortabilityService(db: Db, storage?: StorageService) {
       manifest: resolved.manifest,
       files: finalFiles,
       warnings: resolved.warnings,
-      paperclipExtensionPath,
+      agentikExtensionPath,
     };
   }
 

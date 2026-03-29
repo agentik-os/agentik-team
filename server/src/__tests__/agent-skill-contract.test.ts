@@ -31,8 +31,8 @@ describe("agent skill contract", () => {
       mode: "ephemeral",
       desiredSkills: [],
       entries: [{
-        key: "agentik-os/agentik-team/paperclip",
-        runtimeName: "paperclip",
+        key: "agentik-os/agentik-team/agentik",
+        runtimeName: "agentik-team",
         desired: true,
         managed: true,
         state: "configured",
@@ -41,7 +41,7 @@ describe("agent skill contract", () => {
     })).toMatchObject({
       adapterType: "claude_local",
       entries: [{
-        key: "agentik-os/agentik-team/paperclip",
+        key: "agentik-os/agentik-team/agentik",
         state: "configured",
       }],
     });

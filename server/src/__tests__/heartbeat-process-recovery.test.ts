@@ -38,7 +38,7 @@ describeEmbeddedPostgres("heartbeat orphaned process recovery", () => {
   const childProcesses = new Set<ChildProcess>();
 
   beforeAll(async () => {
-    tempDb = await startEmbeddedPostgresTestDatabase("paperclip-heartbeat-recovery-");
+    tempDb = await startEmbeddedPostgresTestDatabase("agentik-heartbeat-recovery-");
     db = createDb(tempDb.connectionString);
   }, 20_000);
 

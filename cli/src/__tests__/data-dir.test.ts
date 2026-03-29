@@ -20,12 +20,12 @@ describe("applyDataDirOverride", () => {
 
   it("sets AGENTIK_HOME and isolated default config/context paths", () => {
     const home = applyDataDirOverride({
-      dataDir: "~/paperclip-data",
+      dataDir: "~/agentik-data",
       config: undefined,
       context: undefined,
     }, { hasConfigOption: true, hasContextOption: true });
 
-    const expectedHome = path.resolve(os.homedir(), "paperclip-data");
+    const expectedHome = path.resolve(os.homedir(), "agentik-data");
     expect(home).toBe(expectedHome);
     expect(process.env.AGENTIK_HOME).toBe(expectedHome);
     expect(process.env.AGENTIK_CONFIG).toBe(
@@ -37,16 +37,16 @@ describe("applyDataDirOverride", () => {
 
   it("uses the provided instance id when deriving default config path", () => {
     const home = applyDataDirOverride({
-      dataDir: "/tmp/paperclip-alt",
+      dataDir: "/tmp/agentik-alt",
       instance: "dev_1",
       config: undefined,
       context: undefined,
     }, { hasConfigOption: true, hasContextOption: true });
 
-    expect(home).toBe(path.resolve("/tmp/paperclip-alt"));
+    expect(home).toBe(path.resolve("/tmp/agentik-alt"));
     expect(process.env.AGENTIK_INSTANCE_ID).toBe("dev_1");
     expect(process.env.AGENTIK_CONFIG).toBe(
-      path.resolve("/tmp/paperclip-alt", "instances", "dev_1", "config.json"),
+      path.resolve("/tmp/agentik-alt", "instances", "dev_1", "config.json"),
     );
   });
 
@@ -55,7 +55,7 @@ describe("applyDataDirOverride", () => {
     process.env.AGENTIK_CONTEXT = "/env/context.json";
 
     applyDataDirOverride({
-      dataDir: "/tmp/paperclip-alt",
+      dataDir: "/tmp/agentik-alt",
       config: "/flag/config.json",
       context: "/flag/context.json",
     }, { hasConfigOption: true, hasContextOption: true });
@@ -67,12 +67,12 @@ describe("applyDataDirOverride", () => {
   it("only applies defaults for options supported by the command", () => {
     applyDataDirOverride(
       {
-        dataDir: "/tmp/paperclip-alt",
+        dataDir: "/tmp/agentik-alt",
       },
       { hasConfigOption: false, hasContextOption: false },
     );
 
-    expect(process.env.AGENTIK_HOME).toBe(path.resolve("/tmp/paperclip-alt"));
+    expect(process.env.AGENTIK_HOME).toBe(path.resolve("/tmp/agentik-alt"));
     expect(process.env.AGENTIK_CONFIG).toBeUndefined();
     expect(process.env.AGENTIK_CONTEXT).toBeUndefined();
   });

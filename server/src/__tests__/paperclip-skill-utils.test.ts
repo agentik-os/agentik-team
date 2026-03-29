@@ -11,7 +11,7 @@ async function makeTempDir(prefix: string): Promise<string> {
   return fs.mkdtemp(path.join(os.tmpdir(), prefix));
 }
 
-describe("paperclip skill utils", () => {
+describe("agentik skill utils", () => {
   const cleanupDirs = new Set<string>();
 
   afterEach(async () => {
@@ -20,27 +20,27 @@ describe("paperclip skill utils", () => {
   });
 
   it("lists runtime skills from ./skills without pulling in .agents/skills", async () => {
-    const root = await makeTempDir("paperclip-skill-roots-");
+    const root = await makeTempDir("agentik-skill-roots-");
     cleanupDirs.add(root);
 
     const moduleDir = path.join(root, "a", "b", "c", "d", "e");
     await fs.mkdir(moduleDir, { recursive: true });
-    await fs.mkdir(path.join(root, "skills", "paperclip"), { recursive: true });
+    await fs.mkdir(path.join(root, "skills", "agentik"), { recursive: true });
     await fs.mkdir(path.join(root, ".agents", "skills", "release"), { recursive: true });
 
     const entries = await listPaperclipSkillEntries(moduleDir);
 
-    expect(entries.map((entry) => entry.key)).toEqual(["agentik-os/agentik-team/paperclip"]);
-    expect(entries.map((entry) => entry.runtimeName)).toEqual(["paperclip"]);
-    expect(entries[0]?.source).toBe(path.join(root, "skills", "paperclip"));
+    expect(entries.map((entry) => entry.key)).toEqual(["agentik-os/agentik-team/agentik"]);
+    expect(entries.map((entry) => entry.runtimeName)).toEqual(["agentik-team"]);
+    expect(entries[0]?.source).toBe(path.join(root, "skills", "agentik"));
   });
 
   it("removes stale maintainer-only symlinks from a shared skills home", async () => {
-    const root = await makeTempDir("paperclip-skill-cleanup-");
+    const root = await makeTempDir("agentik-skill-cleanup-");
     cleanupDirs.add(root);
 
     const skillsHome = path.join(root, "skills-home");
-    const runtimeSkill = path.join(root, "skills", "paperclip");
+    const runtimeSkill = path.join(root, "skills", "agentik");
     const customSkill = path.join(root, "custom", "release-notes");
     const staleMaintainerSkill = path.join(root, ".agents", "skills", "release");
 
@@ -48,15 +48,15 @@ describe("paperclip skill utils", () => {
     await fs.mkdir(runtimeSkill, { recursive: true });
     await fs.mkdir(customSkill, { recursive: true });
 
-    await fs.symlink(runtimeSkill, path.join(skillsHome, "paperclip"));
+    await fs.symlink(runtimeSkill, path.join(skillsHome, "agentik"));
     await fs.symlink(customSkill, path.join(skillsHome, "release-notes"));
     await fs.symlink(staleMaintainerSkill, path.join(skillsHome, "release"));
 
-    const removed = await removeMaintainerOnlySkillSymlinks(skillsHome, ["paperclip"]);
+    const removed = await removeMaintainerOnlySkillSymlinks(skillsHome, ["agentik-team"]);
 
     expect(removed).toEqual(["release"]);
     await expect(fs.lstat(path.join(skillsHome, "release"))).rejects.toThrow();
-    expect((await fs.lstat(path.join(skillsHome, "paperclip"))).isSymbolicLink()).toBe(true);
+    expect((await fs.lstat(path.join(skillsHome, "agentik"))).isSymbolicLink()).toBe(true);
     expect((await fs.lstat(path.join(skillsHome, "release-notes"))).isSymbolicLink()).toBe(true);
   });
 });

@@ -31,11 +31,11 @@ export function resolveManagedCodexHomeDir(
   env: NodeJS.ProcessEnv,
   companyId?: string,
 ): string {
-  const paperclipHome = nonEmpty(env.AGENTIK_HOME) ?? path.resolve(os.homedir(), ".paperclip");
+  const agentikHome = nonEmpty(env.AGENTIK_HOME) ?? path.resolve(os.homedir(), ".agentik-team");
   const instanceId = nonEmpty(env.AGENTIK_INSTANCE_ID) ?? DEFAULT_AGENTIK_INSTANCE_ID;
   return companyId
-    ? path.resolve(paperclipHome, "instances", instanceId, "companies", companyId, "codex-home")
-    : path.resolve(paperclipHome, "instances", instanceId, "codex-home");
+    ? path.resolve(agentikHome, "instances", instanceId, "companies", companyId, "codex-home")
+    : path.resolve(agentikHome, "instances", instanceId, "codex-home");
 }
 
 async function ensureParentDir(target: string): Promise<void> {
@@ -97,7 +97,7 @@ export async function prepareManagedCodexHome(
 
   await onLog(
     "stdout",
-    `[paperclip] Using ${isWorktreeMode(env) ? "worktree-isolated" : "Paperclip-managed"} Codex home "${targetHome}" (seeded from "${sourceHome}").\n`,
+    `[agentik-team] Using ${isWorktreeMode(env) ? "worktree-isolated" : "Agentik-managed"} Codex home "${targetHome}" (seeded from "${sourceHome}").\n`,
   );
   return targetHome;
 }

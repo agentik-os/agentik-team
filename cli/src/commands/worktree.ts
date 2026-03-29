@@ -45,11 +45,11 @@ import {
   formatEmbeddedPostgresError,
 } from "@agentik-os/db";
 import type { Command } from "commander";
-import { ensureAgentJwtSecret, loadPaperclipEnvFile, mergePaperclipEnvEntries, readPaperclipEnvEntries, resolvePaperclipEnvFile } from "../config/env.js";
+import { ensureAgentJwtSecret, loadAgentikEnvFile, mergeAgentikEnvEntries, readAgentikEnvEntries, resolveAgentikEnvFile } from "../config/env.js";
 import { expandHomePrefix } from "../config/home.js";
-import type { PaperclipConfig } from "../config/schema.js";
+import type { AgentikConfig } from "../config/schema.js";
 import { readConfig, resolveConfigPath, writeConfig } from "../config/store.js";
-import { printPaperclipCliBanner } from "../utils/banner.js";
+import { printAgentikCliBanner } from "../utils/banner.js";
 import { resolveRuntimeLikePath } from "../utils/path-resolver.js";
 import {
   buildWorktreeConfig,
@@ -173,7 +173,7 @@ function isCurrentSourceConfigPath(sourceConfigPath: string): boolean {
   return path.resolve(currentConfigPath) === path.resolve(sourceConfigPath);
 }
 
-const WORKTREE_NAME_PREFIX = "paperclip-";
+const WORKTREE_NAME_PREFIX = "agentik-team-";
 
 function resolveWorktreeMakeName(name: string): string {
   const value = nonEmpty(name);
@@ -272,7 +272,7 @@ function buildS3ObjectKey(prefix: string, objectKey: string): string {
 
 const dynamicImport = new Function("specifier", "return import(specifier);") as (specifier: string) => Promise<any>;
 
-function createConfiguredStorageFromPaperclipConfig(config: PaperclipConfig): ConfiguredStorage {
+function createConfiguredStorageFromAgentikConfig(config: AgentikConfig): ConfiguredStorage {
   if (config.storage.provider === "local_disk") {
     const baseDir = expandHomePrefix(config.storage.localDisk.baseDir);
     return {
@@ -341,7 +341,7 @@ function openConfiguredStorage(configPath: string): ConfiguredStorage {
   if (!config) {
     throw new Error(`Config not found at ${configPath}.`);
   }
-  return createConfiguredStorageFromPaperclipConfig(config);
+  return createConfiguredStorageFromAgentikConfig(config);
 }
 
 async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
@@ -469,11 +469,11 @@ async function findAvailablePort(preferredPort: number, reserved = new Set<numbe
 
 function resolveRepoManagedWorktreesRoot(cwd: string): string | null {
   const normalized = path.resolve(cwd);
-  const marker = `${path.sep}.paperclip${path.sep}worktrees${path.sep}`;
+  const marker = `${path.sep}.agentik-team${path.sep}worktrees${path.sep}`;
   const index = normalized.indexOf(marker);
   if (index === -1) return null;
   const repoRoot = normalized.slice(0, index);
-  return path.resolve(repoRoot, ".paperclip", "worktrees");
+  return path.resolve(repoRoot, ".agentik-team", "worktrees");
 }
 
 function collectClaimedWorktreePorts(homeDir: string, currentInstanceId: string, cwd: string): {
@@ -499,7 +499,7 @@ function collectClaimedWorktreePorts(homeDir: string, currentInstanceId: string,
   if (repoManagedWorktreesRoot && existsSync(repoManagedWorktreesRoot)) {
     for (const entry of readdirSync(repoManagedWorktreesRoot, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
-      const configPath = path.resolve(repoManagedWorktreesRoot, entry.name, ".paperclip", "config.json");
+      const configPath = path.resolve(repoManagedWorktreesRoot, entry.name, ".agentik-team", "config.json");
       if (existsSync(configPath)) {
         configPaths.add(configPath);
       }
@@ -716,12 +716,12 @@ export function resolveSourceConfigPath(opts: WorktreeInitOptions): string {
   if (!opts.fromDataDir && !opts.fromInstance) {
     return resolveConfigPath();
   }
-  const sourceHome = path.resolve(expandHomePrefix(opts.fromDataDir ?? "~/.paperclip"));
+  const sourceHome = path.resolve(expandHomePrefix(opts.fromDataDir ?? "~/.agentik-team"));
   const sourceInstanceId = sanitizeWorktreeInstanceId(opts.fromInstance ?? "default");
   return path.resolve(sourceHome, "instances", sourceInstanceId, "config.json");
 }
 
-function resolveSourceConnectionString(config: PaperclipConfig, envEntries: Record<string, string>, portOverride?: number): string {
+function resolveSourceConnectionString(config: AgentikConfig, envEntries: Record<string, string>, portOverride?: number): string {
   if (config.database.mode === "postgres") {
     const connectionString = nonEmpty(envEntries.DATABASE_URL) ?? nonEmpty(config.database.connectionString);
     if (!connectionString) {
@@ -733,12 +733,12 @@ function resolveSourceConnectionString(config: PaperclipConfig, envEntries: Reco
   }
 
   const port = portOverride ?? config.database.embeddedPostgresPort;
-  return `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`;
+  return `postgres://agentik:agentik@127.0.0.1:${port}/agentik`;
 }
 
 export function copySeededSecretsKey(input: {
   sourceConfigPath: string;
-  sourceConfig: PaperclipConfig;
+  sourceConfig: AgentikConfig;
   sourceEnvEntries: Record<string, string>;
   targetKeyFilePath: string;
 }): void {
@@ -811,8 +811,8 @@ async function ensureEmbeddedPostgres(dataDir: string, preferredPort: number): P
   const logBuffer = createEmbeddedPostgresLogBuffer();
   const instance = new EmbeddedPostgres({
     databaseDir: dataDir,
-    user: "paperclip",
-    password: "paperclip",
+    user: "agentik-team",
+    password: "agentik-team",
     port,
     persistent: true,
     initdbFlags: ["--encoding=UTF8", "--locale=C", "--lc-messages=C"],
@@ -853,15 +853,15 @@ async function ensureEmbeddedPostgres(dataDir: string, preferredPort: number): P
 
 async function seedWorktreeDatabase(input: {
   sourceConfigPath: string;
-  sourceConfig: PaperclipConfig;
-  targetConfig: PaperclipConfig;
+  sourceConfig: AgentikConfig;
+  targetConfig: AgentikConfig;
   targetPaths: WorktreeLocalPaths;
   instanceId: string;
   seedMode: WorktreeSeedMode;
 }): Promise<SeedWorktreeDatabaseResult> {
   const seedPlan = resolveWorktreeSeedPlan(input.seedMode);
-  const sourceEnvFile = resolvePaperclipEnvFile(input.sourceConfigPath);
-  const sourceEnvEntries = readPaperclipEnvEntries(sourceEnvFile);
+  const sourceEnvFile = resolveAgentikEnvFile(input.sourceConfigPath);
+  const sourceEnvEntries = readAgentikEnvEntries(sourceEnvFile);
   copySeededSecretsKey({
     sourceConfigPath: input.sourceConfigPath,
     sourceConfig: input.sourceConfig,
@@ -898,9 +898,9 @@ async function seedWorktreeDatabase(input: {
       input.targetConfig.database.embeddedPostgresPort,
     );
 
-    const adminConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${targetHandle.port}/postgres`;
-    await ensurePostgresDatabase(adminConnectionString, "paperclip");
-    const targetConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${targetHandle.port}/paperclip`;
+    const adminConnectionString = `postgres://agentik:agentik@127.0.0.1:${targetHandle.port}/postgres`;
+    await ensurePostgresDatabase(adminConnectionString, "agentik-team");
+    const targetConnectionString = `postgres://agentik:agentik@127.0.0.1:${targetHandle.port}/agentik`;
     await runDatabaseRestore({
       connectionString: targetConnectionString,
       backupFile: backup.backupFile,
@@ -975,11 +975,11 @@ async function runWorktreeInit(opts: WorktreeInitOptions): Promise<void> {
   });
 
   writeConfig(targetConfig, paths.configPath);
-  const sourceEnvEntries = readPaperclipEnvEntries(resolvePaperclipEnvFile(sourceConfigPath));
+  const sourceEnvEntries = readAgentikEnvEntries(resolveAgentikEnvFile(sourceConfigPath));
   const existingAgentJwtSecret =
     nonEmpty(sourceEnvEntries.AGENTIK_AGENT_JWT_SECRET) ??
     nonEmpty(process.env.AGENTIK_AGENT_JWT_SECRET);
-  mergePaperclipEnvEntries(
+  mergeAgentikEnvEntries(
     {
       ...buildWorktreeEnvEntries(paths, branding),
       ...(existingAgentJwtSecret ? { AGENTIK_AGENT_JWT_SECRET: existingAgentJwtSecret } : {}),
@@ -987,7 +987,7 @@ async function runWorktreeInit(opts: WorktreeInitOptions): Promise<void> {
     paths.envPath,
   );
   ensureAgentJwtSecret(paths.configPath);
-  loadPaperclipEnvFile(paths.configPath);
+  loadAgentikEnvFile(paths.configPath);
   const copiedGitHooks = copyGitHooksToWorktreeGitDir(cwd);
 
   let seedSummary: string | null = null;
@@ -1046,13 +1046,13 @@ async function runWorktreeInit(opts: WorktreeInitOptions): Promise<void> {
 }
 
 export async function worktreeInitCommand(opts: WorktreeInitOptions): Promise<void> {
-  printPaperclipCliBanner();
+  printAgentikCliBanner();
   p.intro(pc.bgCyan(pc.black(" agentik-team worktree init ")));
   await runWorktreeInit(opts);
 }
 
 export async function worktreeMakeCommand(nameArg: string, opts: WorktreeMakeOptions): Promise<void> {
-  printPaperclipCliBanner();
+  printAgentikCliBanner();
   p.intro(pc.bgCyan(pc.black(" agentik-team worktree:make ")));
 
   const name = resolveWorktreeMakeName(nameArg);
@@ -1144,7 +1144,7 @@ type MergeSourceChoice = {
   worktree: string;
   branch: string | null;
   branchLabel: string;
-  hasPaperclipConfig: boolean;
+  hasAgentikConfig: boolean;
   isCurrent: boolean;
 };
 
@@ -1202,7 +1202,7 @@ function toMergeSourceChoices(cwd: string): MergeSourceChoice[] {
       worktree: worktreePath,
       branch: entry.branch,
       branchLabel,
-      hasPaperclipConfig: existsSync(path.resolve(worktreePath, ".paperclip", "config.json")),
+      hasAgentikConfig: existsSync(path.resolve(worktreePath, ".agentik-team", "config.json")),
       isCurrent: worktreePath === currentCwd,
     };
   });
@@ -1248,7 +1248,7 @@ function worktreePathHasUncommittedChanges(worktreePath: string): boolean {
 }
 
 export async function worktreeCleanupCommand(nameArg: string, opts: WorktreeCleanupOptions): Promise<void> {
-  printPaperclipCliBanner();
+  printAgentikCliBanner();
   p.intro(pc.bgCyan(pc.black(" agentik-team worktree:cleanup ")));
 
   const name = resolveWorktreeMakeName(nameArg);
@@ -1385,8 +1385,8 @@ export async function worktreeCleanupCommand(nameArg: string, opts: WorktreeClea
 
 export async function worktreeEnvCommand(opts: WorktreeEnvOptions): Promise<void> {
   const configPath = resolveConfigPath(opts.config);
-  const envPath = resolvePaperclipEnvFile(configPath);
-  const envEntries = readPaperclipEnvEntries(envPath);
+  const envPath = resolveAgentikEnvFile(configPath);
+  const envEntries = readAgentikEnvEntries(envPath);
   const out = {
     AGENTIK_CONFIG: configPath,
     ...(envEntries.AGENTIK_HOME ? { AGENTIK_HOME: envEntries.AGENTIK_HOME } : {}),
@@ -1440,8 +1440,8 @@ function resolveAttachmentLookupStorages(input: {
     resolveCurrentEndpoint().configPath,
     input.targetEndpoint.configPath,
     ...toMergeSourceChoices(process.cwd())
-      .filter((choice) => choice.hasPaperclipConfig)
-      .map((choice) => path.resolve(choice.worktree, ".paperclip", "config.json")),
+      .filter((choice) => choice.hasAgentikConfig)
+      .map((choice) => path.resolve(choice.worktree, ".agentik-team", "config.json")),
   ];
   const seen = new Set<string>();
   const storages: ConfiguredStorage[] = [];
@@ -1459,7 +1459,7 @@ async function openConfiguredDb(configPath: string): Promise<OpenDbHandle> {
   if (!config) {
     throw new Error(`Config not found at ${configPath}.`);
   }
-  const envEntries = readPaperclipEnvEntries(resolvePaperclipEnvFile(configPath));
+  const envEntries = readAgentikEnvEntries(resolveAgentikEnvFile(configPath));
   let embeddedHandle: EmbeddedPostgresHandle | null = null;
 
   try {
@@ -1993,7 +1993,7 @@ export async function worktreeListCommand(opts: WorktreeListOptions): Promise<vo
   for (const choice of choices) {
     const flags = [
       choice.isCurrent ? "current" : null,
-      choice.hasPaperclipConfig ? "paperclip" : "no-paperclip-config",
+      choice.hasAgentikConfig ? "agentik-team" : "no-agentik-config",
     ].filter((value): value is string => value !== null);
     p.log.message(`${choice.branchLabel}  ${choice.worktree}  [${flags.join(", ")}]`);
   }
@@ -2005,7 +2005,7 @@ function resolveEndpointFromChoice(choice: MergeSourceChoice): ResolvedWorktreeE
   }
   return {
     rootPath: choice.worktree,
-    configPath: path.resolve(choice.worktree, ".paperclip", "config.json"),
+    configPath: path.resolve(choice.worktree, ".agentik-team", "config.json"),
     label: choice.branchLabel,
     isCurrent: false,
   };
@@ -2032,9 +2032,9 @@ function resolveWorktreeEndpointFromSelector(
     if (allowCurrent && directPath === currentEndpoint.rootPath) {
       return currentEndpoint;
     }
-    const configPath = path.resolve(directPath, ".paperclip", "config.json");
+    const configPath = path.resolve(directPath, ".agentik-team", "config.json");
     if (!existsSync(configPath)) {
-      throw new Error(`Resolved worktree path ${directPath} does not contain .paperclip/config.json.`);
+      throw new Error(`Resolved worktree path ${directPath} does not contain .agentik-team/config.json.`);
     }
     return {
       rootPath: directPath,
@@ -2055,8 +2055,8 @@ function resolveWorktreeEndpointFromSelector(
       `Could not resolve worktree "${selector}". Use a path, a listed worktree directory name, branch name, or "current".`,
     );
   }
-  if (!matched.hasPaperclipConfig && !matched.isCurrent) {
-    throw new Error(`Resolved worktree "${selector}" does not look like a Paperclip worktree.`);
+  if (!matched.hasAgentikConfig && !matched.isCurrent) {
+    throw new Error(`Resolved worktree "${selector}" does not look like a Agentik Team worktree.`);
   }
   return resolveEndpointFromChoice(matched);
 }
@@ -2065,7 +2065,7 @@ async function promptForSourceEndpoint(excludeWorktreePath?: string): Promise<Re
   const excluded = excludeWorktreePath ? path.resolve(excludeWorktreePath) : null;
   const currentEndpoint = resolveCurrentEndpoint();
   const choices = toMergeSourceChoices(process.cwd())
-    .filter((choice) => choice.hasPaperclipConfig || choice.isCurrent)
+    .filter((choice) => choice.hasAgentikConfig || choice.isCurrent)
     .filter((choice) => path.resolve(choice.worktree) !== excluded)
     .map((choice) => ({
       value: choice.isCurrent ? "__current__" : choice.worktree,
@@ -2073,7 +2073,7 @@ async function promptForSourceEndpoint(excludeWorktreePath?: string): Promise<Re
       hint: `${choice.worktree}${choice.isCurrent ? " (current)" : ""}`,
     }));
   if (choices.length === 0) {
-    throw new Error("No Paperclip worktrees were found. Run `agentik-team worktree:list` to inspect the repo worktrees.");
+    throw new Error("No Agentik Team worktrees were found. Run `agentik-team worktree:list` to inspect the repo worktrees.");
   }
   const selection = await p.select<string>({
     message: "Choose the source worktree to import from",
@@ -2595,7 +2595,7 @@ export function registerWorktreeCommands(program: Command): void {
   program
     .command("worktree:make")
     .description("Create ~/NAME as a git worktree, then initialize an isolated Paperclip instance inside it")
-    .argument("<name>", "Worktree name — auto-prefixed with paperclip- if needed (created at ~/paperclip-NAME)")
+    .argument("<name>", "Worktree name — auto-prefixed with agentik-team- if needed (created at ~/agentik-team-NAME)")
     .option("--start-point <ref>", "Remote ref to base the new branch on (env: AGENTIK_WORKTREE_START_POINT)")
     .option("--instance <id>", "Explicit isolated instance id")
     .option("--home <path>", `Home root for worktree instances (env: AGENTIK_WORKTREES_DIR, default: ${DEFAULT_WORKTREE_HOME})`)
@@ -2634,7 +2634,7 @@ export function registerWorktreeCommands(program: Command): void {
 
   program
     .command("worktree:list")
-    .description("List git worktrees visible from this repo and whether they look like Paperclip worktrees")
+    .description("List git worktrees visible from this repo and whether they look like Agentik Team worktrees")
     .option("--json", "Print JSON instead of text output")
     .action(worktreeListCommand);
 
@@ -2654,7 +2654,7 @@ export function registerWorktreeCommands(program: Command): void {
   program
     .command("worktree:cleanup")
     .description("Safely remove a worktree, its branch, and its isolated instance data")
-    .argument("<name>", "Worktree name — auto-prefixed with paperclip- if needed")
+    .argument("<name>", "Worktree name — auto-prefixed with agentik-team- if needed")
     .option("--instance <id>", "Explicit instance id (if different from the worktree name)")
     .option("--home <path>", `Home root for worktree instances (env: AGENTIK_WORKTREES_DIR, default: ${DEFAULT_WORKTREE_HOME})`)
     .option("--force", "Bypass safety checks (uncommitted changes, unique commits)", false)

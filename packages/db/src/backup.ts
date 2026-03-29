@@ -21,13 +21,13 @@ function expandHomePrefix(value: string): string {
   return value;
 }
 
-function resolvePaperclipHomeDir(): string {
+function resolveAgentikHomeDir(): string {
   const envHome = process.env.AGENTIK_HOME?.trim();
   if (envHome) return path.resolve(expandHomePrefix(envHome));
-  return path.resolve(os.homedir(), ".paperclip");
+  return path.resolve(os.homedir(), ".agentik-team");
 }
 
-function resolvePaperclipInstanceId(): string {
+function resolveAgentikInstanceId(): string {
   const raw = process.env.AGENTIK_INSTANCE_ID?.trim() || "default";
   if (!/^[a-zA-Z0-9_-]+$/.test(raw)) {
     throw new Error(`Invalid AGENTIK_INSTANCE_ID '${raw}'.`);
@@ -36,7 +36,7 @@ function resolvePaperclipInstanceId(): string {
 }
 
 function resolveDefaultConfigPath(): string {
-  return path.resolve(resolvePaperclipHomeDir(), "instances", resolvePaperclipInstanceId(), "config.json");
+  return path.resolve(resolveAgentikHomeDir(), "instances", resolveAgentikInstanceId(), "config.json");
 }
 
 function readConfig(configPath: string): PartialConfig | null {
@@ -69,11 +69,11 @@ function resolveConnectionString(config: PartialConfig | null): string {
   }
 
   const port = resolveEmbeddedPort(config);
-  return `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`;
+  return `postgres://agentik:agentik@127.0.0.1:${port}/agentik`;
 }
 
 function resolveDefaultBackupDir(): string {
-  return path.resolve(resolvePaperclipHomeDir(), "instances", resolvePaperclipInstanceId(), "data", "backups");
+  return path.resolve(resolveAgentikHomeDir(), "instances", resolveAgentikInstanceId(), "data", "backups");
 }
 
 function resolveBackupDir(config: PartialConfig | null): string {
@@ -104,7 +104,7 @@ async function main() {
       connectionString,
       backupDir,
       retentionDays,
-      filenamePrefix: "paperclip",
+      filenamePrefix: "agentik-team",
     });
 
     console.log(`Backup saved: ${formatDatabaseBackupResult(result)}`);

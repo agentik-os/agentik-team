@@ -1,10 +1,10 @@
 import * as p from "@clack/prompts";
 import type { SecretProvider } from "@agentik-os/shared";
 import type { SecretsConfig } from "../config/schema.js";
-import { resolveDefaultSecretsKeyFilePath, resolvePaperclipInstanceId } from "../config/home.js";
+import { resolveDefaultSecretsKeyFilePath, resolveAgentikInstanceId } from "../config/home.js";
 
 function defaultKeyFilePath(): string {
-  return resolveDefaultSecretsKeyFilePath(resolvePaperclipInstanceId());
+  return resolveDefaultSecretsKeyFilePath(resolveAgentikInstanceId());
 }
 
 export function defaultSecretsConfig(): SecretsConfig {

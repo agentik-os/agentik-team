@@ -1,5 +1,5 @@
 export {
-  paperclipConfigSchema,
+  agentikConfigSchema,
   configMetaSchema,
   llmConfigSchema,
   databaseBackupConfigSchema,
@@ -12,7 +12,7 @@ export {
   storageS3ConfigSchema,
   secretsConfigSchema,
   secretsLocalEncryptedConfigSchema,
-  type PaperclipConfig,
+  type AgentikConfig,
   type LlmConfig,
   type DatabaseBackupConfig,
   type DatabaseConfig,

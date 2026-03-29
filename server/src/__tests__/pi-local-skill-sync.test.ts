@@ -12,7 +12,7 @@ async function makeTempDir(prefix: string): Promise<string> {
 }
 
 describe("pi local skill sync", () => {
-  const paperclipKey = "agentik-os/agentik-team/paperclip";
+  const agentikKey = "agentik-os/agentik-team/agentik";
   const cleanupDirs = new Set<string>();
 
   afterEach(async () => {
@@ -21,7 +21,7 @@ describe("pi local skill sync", () => {
   });
 
   it("reports configured Paperclip skills and installs them into the Pi skills home", async () => {
-    const home = await makeTempDir("paperclip-pi-skill-sync-");
+    const home = await makeTempDir("agentik-pi-skill-sync-");
     cleanupDirs.add(home);
 
     const ctx = {
@@ -33,24 +33,24 @@ describe("pi local skill sync", () => {
           HOME: home,
         },
         paperclipSkillSync: {
-          desiredSkills: [paperclipKey],
+          desiredSkills: [agentikKey],
         },
       },
     } as const;
 
     const before = await listPiSkills(ctx);
     expect(before.mode).toBe("persistent");
-    expect(before.desiredSkills).toContain(paperclipKey);
-    expect(before.entries.find((entry) => entry.key === paperclipKey)?.required).toBe(true);
-    expect(before.entries.find((entry) => entry.key === paperclipKey)?.state).toBe("missing");
+    expect(before.desiredSkills).toContain(agentikKey);
+    expect(before.entries.find((entry) => entry.key === agentikKey)?.required).toBe(true);
+    expect(before.entries.find((entry) => entry.key === agentikKey)?.state).toBe("missing");
 
-    const after = await syncPiSkills(ctx, [paperclipKey]);
-    expect(after.entries.find((entry) => entry.key === paperclipKey)?.state).toBe("installed");
-    expect((await fs.lstat(path.join(home, ".pi", "agent", "skills", "paperclip"))).isSymbolicLink()).toBe(true);
+    const after = await syncPiSkills(ctx, [agentikKey]);
+    expect(after.entries.find((entry) => entry.key === agentikKey)?.state).toBe("installed");
+    expect((await fs.lstat(path.join(home, ".pi", "agent", "skills", "agentik"))).isSymbolicLink()).toBe(true);
   });
 
   it("keeps required bundled Paperclip skills installed even when the desired set is emptied", async () => {
-    const home = await makeTempDir("paperclip-pi-skill-prune-");
+    const home = await makeTempDir("agentik-pi-skill-prune-");
     cleanupDirs.add(home);
 
     const configuredCtx = {
@@ -62,12 +62,12 @@ describe("pi local skill sync", () => {
           HOME: home,
         },
         paperclipSkillSync: {
-          desiredSkills: [paperclipKey],
+          desiredSkills: [agentikKey],
         },
       },
     } as const;
 
-    await syncPiSkills(configuredCtx, [paperclipKey]);
+    await syncPiSkills(configuredCtx, [agentikKey]);
 
     const clearedCtx = {
       ...configuredCtx,
@@ -82,8 +82,8 @@ describe("pi local skill sync", () => {
     } as const;
 
     const after = await syncPiSkills(clearedCtx, []);
-    expect(after.desiredSkills).toContain(paperclipKey);
-    expect(after.entries.find((entry) => entry.key === paperclipKey)?.state).toBe("installed");
-    expect((await fs.lstat(path.join(home, ".pi", "agent", "skills", "paperclip"))).isSymbolicLink()).toBe(true);
+    expect(after.desiredSkills).toContain(agentikKey);
+    expect(after.entries.find((entry) => entry.key === agentikKey)?.state).toBe("installed");
+    expect((await fs.lstat(path.join(home, ".pi", "agent", "skills", "agentik"))).isSymbolicLink()).toBe(true);
   });
 });

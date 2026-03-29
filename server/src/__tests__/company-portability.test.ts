@@ -112,7 +112,7 @@ function asTextFile(entry: CompanyPortabilityFileEntry | undefined) {
 }
 
 describe("company portability", () => {
-  const paperclipKey = "agentik-os/agentik-team/paperclip";
+  const agentikKey = "agentik-os/agentik-team/agentik";
   const companyPlaybookKey = "company/company-1/company-playbook";
 
   beforeEach(() => {
@@ -141,7 +141,7 @@ describe("company portability", () => {
         adapterConfig: {
           promptTemplate: "You are ClaudeCoder.",
           paperclipSkillSync: {
-            desiredSkills: [paperclipKey],
+            desiredSkills: [agentikKey],
           },
           instructionsFilePath: "/tmp/ignored.md",
           cwd: "/tmp/ignored",
@@ -261,13 +261,13 @@ describe("company portability", () => {
       {
         id: "skill-1",
         companyId: "company-1",
-        key: paperclipKey,
-        slug: "paperclip",
-        name: "paperclip",
-        description: "Paperclip coordination skill",
-        markdown: "---\nname: paperclip\ndescription: Paperclip coordination skill\n---\n\n# Paperclip\n",
+        key: agentikKey,
+        slug: "agentik-team",
+        name: "agentik-team",
+        description: "Agentik Team coordination skill",
+        markdown: "---\nname: agentik\ndescription: Agentik Team coordination skill\n---\n\n# Agentik Team\n",
         sourceType: "github",
-        sourceLocator: "https://github.com/agentik-os/agentik-team/tree/master/skills/paperclip",
+        sourceLocator: "https://github.com/agentik-os/agentik-team/tree/master/skills/agentik",
         sourceRef: "0123456789abcdef0123456789abcdef01234567",
         trustLevel: "markdown_only",
         compatibility: "compatible",
@@ -278,10 +278,10 @@ describe("company portability", () => {
         metadata: {
           sourceKind: "github",
           owner: "agentik-team",
-          repo: "paperclip",
+          repo: "agentik-team",
           ref: "0123456789abcdef0123456789abcdef01234567",
           trackingRef: "master",
-          repoSkillDir: "skills/paperclip",
+          repoSkillDir: "skills/agentik",
         },
       },
       {
@@ -328,7 +328,7 @@ describe("company portability", () => {
         path: relativePath,
         kind: relativePath === "SKILL.md" ? "skill" : "reference",
         content: relativePath === "SKILL.md"
-          ? "---\nname: paperclip\ndescription: Paperclip coordination skill\n---\n\n# Paperclip\n"
+          ? "---\nname: agentik\ndescription: Agentik Team coordination skill\n---\n\n# Agentik Team\n"
           : "# API\n",
         language: "markdown",
         markdown: true,
@@ -421,7 +421,7 @@ describe("company portability", () => {
     expect(asTextFile(exported.files["skills/company/PAP/company-playbook/SKILL.md"])).toContain("# Company Playbook");
     expect(asTextFile(exported.files["skills/company/PAP/company-playbook/references/checklist.md"])).toContain("# Checklist");
 
-    const extension = asTextFile(exported.files[".paperclip.yaml"]);
+    const extension = asTextFile(exported.files[".agentik-team.yaml"]);
     expect(extension).toContain('schema: "paperclip/v1"');
     expect(extension).not.toContain("promptTemplate");
     expect(extension).not.toContain("instructionsFilePath");
@@ -440,7 +440,7 @@ describe("company portability", () => {
     expect(exported.warnings).toContain("Agent claudecoder PATH override was omitted from export because it is system-dependent.");
   });
 
-  it("exports default sidebar order into the Paperclip extension and manifest", async () => {
+  it("exports default sidebar order into the Agentik Team extension and manifest", async () => {
     const portability = companyPortabilityService({} as any);
 
     projectSvc.list.mockResolvedValue([
@@ -483,7 +483,7 @@ describe("company portability", () => {
       },
     });
 
-    expect(asTextFile(exported.files[".paperclip.yaml"])).toContain([
+    expect(asTextFile(exported.files[".agentik-team.yaml"])).toContain([
       "sidebar:",
       "  agents:",
       '    - "claudecoder"',
@@ -511,7 +511,7 @@ describe("company portability", () => {
       expandReferencedSkills: true,
     });
 
-    expect(asTextFile(exported.files["skills/agentik-os/agentik-team/paperclip/SKILL.md"])).toContain("# Paperclip");
+    expect(asTextFile(exported.files["skills/agentik-os/agentik-team/paperclip/SKILL.md"])).toContain("# Agentik Team");
     expect(asTextFile(exported.files["skills/agentik-os/agentik-team/paperclip/SKILL.md"])).toContain("metadata:");
     expect(asTextFile(exported.files["skills/agentik-os/agentik-team/paperclip/references/api.md"])).toContain("# API");
   });
@@ -552,7 +552,7 @@ describe("company portability", () => {
     expect(exported.files["skills/agentik-os/agentik-team/paperclip/SKILL.md"]).toBeDefined();
   });
 
-  it("exports the company logo into images/ and references it from .paperclip.yaml", async () => {
+  it("exports the company logo into images/ and references it from .agentik-team.yaml", async () => {
     const storage = {
       getObject: vi.fn().mockResolvedValue({
         stream: Readable.from([Buffer.from("png-bytes")]),
@@ -593,7 +593,7 @@ describe("company portability", () => {
       data: Buffer.from("png-bytes").toString("base64"),
       contentType: "image/png",
     });
-    expect(exported.files[".paperclip.yaml"]).toContain('logoPath: "images/company-logo.png"');
+    expect(exported.files[".agentik-team.yaml"]).toContain('logoPath: "images/company-logo.png"');
   });
 
   it("exports duplicate skill slugs into readable namespaced paths", async () => {
@@ -643,7 +643,7 @@ describe("company portability", () => {
         },
       },
       {
-        id: "skill-paperclip",
+        id: "skill-agentik",
         companyId: "company-1",
         key: "agentik-os/agentik-team/release-changelog",
         slug: "release-changelog",
@@ -659,7 +659,7 @@ describe("company portability", () => {
         metadata: {
           sourceKind: "paperclip_bundled",
           owner: "agentik-team",
-          repo: "paperclip",
+          repo: "agentik-team",
           ref: "0123456789abcdef0123456789abcdef01234567",
           trackingRef: "master",
           repoSkillDir: "skills/release-changelog",
@@ -755,13 +755,13 @@ describe("company portability", () => {
             projectId: "project-1",
             name: "Main Repo",
             sourceType: "git_repo",
-            cwd: "/Users/dotta/paperclip",
+            cwd: "/Users/dotta/agentik",
             repoUrl: "https://github.com/agentik-os/agentik-team.git",
             repoRef: "main",
             defaultRef: "main",
             visibility: "default",
             setupCommand: "pnpm install",
-            cleanupCommand: "rm -rf .paperclip-tmp",
+            cleanupCommand: "rm -rf .agentik-tmp",
             remoteProvider: null,
             remoteWorkspaceRef: null,
             sharedWorkspaceKey: null,
@@ -778,7 +778,7 @@ describe("company portability", () => {
             projectId: "project-1",
             name: "Local Scratch",
             sourceType: "local_path",
-            cwd: "/tmp/paperclip-local",
+            cwd: "/tmp/agentik-local",
             repoUrl: null,
             repoRef: null,
             defaultRef: null,
@@ -826,13 +826,13 @@ describe("company portability", () => {
       },
     });
 
-    const extension = asTextFile(exported.files[".paperclip.yaml"]);
+    const extension = asTextFile(exported.files[".agentik-team.yaml"]);
     expect(extension).toContain("workspaces:");
     expect(extension).toContain("main-repo:");
     expect(extension).toContain('repoUrl: "https://github.com/agentik-os/agentik-team.git"');
     expect(extension).toContain('defaultProjectWorkspaceKey: "main-repo"');
     expect(extension).toContain('projectWorkspaceKey: "main-repo"');
-    expect(extension).not.toContain("/Users/dotta/paperclip");
+    expect(extension).not.toContain("/Users/dotta/agentik");
     expect(extension).not.toContain("workspace-1");
     expect(exported.warnings).toContain("Project launch workspace Local Scratch was omitted from export because it does not have a portable repoUrl.");
 
@@ -923,7 +923,7 @@ describe("company portability", () => {
 
   it("infers portable git metadata from a local checkout without task warning fan-out", async () => {
     const portability = companyPortabilityService({} as any);
-    const repoDir = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-portability-git-"));
+    const repoDir = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-portability-git-"));
     execFileSync("git", ["init"], { cwd: repoDir, stdio: "ignore" });
     execFileSync("git", ["checkout", "-b", "main"], { cwd: repoDir, stdio: "ignore" });
     execFileSync("git", ["remote", "add", "origin", "https://github.com/agentik-os/agentik-team.git"], {
@@ -935,7 +935,7 @@ describe("company portability", () => {
       {
         id: "project-1",
         name: "Paperclip App",
-        urlKey: "paperclip-app",
+        urlKey: "agentik-app",
         description: "Ship it",
         leadAgentId: null,
         targetDate: null,
@@ -951,7 +951,7 @@ describe("company portability", () => {
             id: "workspace-1",
             companyId: "company-1",
             projectId: "project-1",
-            name: "paperclip",
+            name: "agentik-team",
             sourceType: "local_path",
             cwd: repoDir,
             repoUrl: null,
@@ -999,9 +999,9 @@ describe("company portability", () => {
       },
     });
 
-    const extension = asTextFile(exported.files[".paperclip.yaml"]);
+    const extension = asTextFile(exported.files[".agentik-team.yaml"]);
     expect(extension).toContain('repoUrl: "https://github.com/agentik-os/agentik-team.git"');
-    expect(extension).toContain('projectWorkspaceKey: "paperclip"');
+    expect(extension).toContain('projectWorkspaceKey: "agentik-team"');
     expect(exported.warnings).not.toContainEqual(expect.stringContaining("does not have a portable repoUrl"));
     expect(exported.warnings).not.toContainEqual(expect.stringContaining("reference workspace workspace-1"));
   });
@@ -1109,7 +1109,7 @@ describe("company portability", () => {
     expect(exported.warnings.filter((warning) => warning.includes("could not be exported portably"))).toHaveLength(1);
   });
 
-  it("reads env inputs back from .paperclip.yaml during preview import", async () => {
+  it("reads env inputs back from .agentik-team.yaml during preview import", async () => {
     const portability = companyPortabilityService({} as any);
 
     const exported = await portability.exportBundle("company-1", {
@@ -1269,7 +1269,7 @@ describe("company portability", () => {
     });
 
     expect(asTextFile(exported.files["tasks/monday-review/TASK.md"])).toContain('recurring: true');
-    const extension = asTextFile(exported.files[".paperclip.yaml"]);
+    const extension = asTextFile(exported.files[".agentik-team.yaml"]);
     expect(extension).toContain("routines:");
     expect(extension).toContain("monday-review:");
     expect(extension).toContain('cronExpression: "0 9 * * 1"');
@@ -1347,7 +1347,7 @@ describe("company portability", () => {
         "Review pipeline health.",
         "",
       ].join("\n"),
-      ".paperclip.yaml": [
+      ".agentik-team.yaml": [
         'schema: "paperclip/v1"',
         "routines:",
         "  monday-review:",
@@ -1368,7 +1368,7 @@ describe("company portability", () => {
     };
 
     const preview = await portability.previewImport({
-      source: { type: "inline", rootPath: "paperclip-demo", files },
+      source: { type: "inline", rootPath: "agentik-demo", files },
       include: { company: true, agents: true, projects: true, issues: true, skills: false },
       target: { mode: "new_company", newCompanyName: "Imported Paperclip" },
       agents: "all",
@@ -1384,7 +1384,7 @@ describe("company portability", () => {
     ]);
 
     await portability.importBundle({
-      source: { type: "inline", rootPath: "paperclip-demo", files },
+      source: { type: "inline", rootPath: "agentik-demo", files },
       include: { company: true, agents: true, projects: true, issues: true, skills: false },
       target: { mode: "new_company", newCompanyName: "Imported Paperclip" },
       agents: "all",
@@ -1460,7 +1460,7 @@ describe("company portability", () => {
     };
 
     const preview = await portability.previewImport({
-      source: { type: "inline", rootPath: "paperclip-demo", files },
+      source: { type: "inline", rootPath: "agentik-demo", files },
       include: { company: true, agents: true, projects: true, issues: true, skills: false },
       target: { mode: "new_company", newCompanyName: "Imported Paperclip" },
       agents: "all",
@@ -1474,7 +1474,7 @@ describe("company portability", () => {
     }));
 
     await portability.importBundle({
-      source: { type: "inline", rootPath: "paperclip-demo", files },
+      source: { type: "inline", rootPath: "agentik-demo", files },
       include: { company: true, agents: true, projects: true, issues: true, skills: false },
       target: { mode: "new_company", newCompanyName: "Imported Paperclip" },
       agents: "all",
@@ -1495,7 +1495,7 @@ describe("company portability", () => {
     const preview = await portability.previewImport({
       source: {
         type: "inline",
-        rootPath: "paperclip-demo",
+        rootPath: "agentik-demo",
         files: {
           "COMPANY.md": ['---', 'schema: "agentcompanies/v1"', 'name: "Imported Paperclip"', "---", ""].join("\n"),
           "tasks/monday-review/TASK.md": [
@@ -1518,7 +1518,7 @@ describe("company portability", () => {
     expect(preview.errors).toContain("Recurring task monday-review must declare an assignee to import as a routine.");
   });
 
-  it("imports a vendor-neutral package without .paperclip.yaml", async () => {
+  it("imports a vendor-neutral package without .agentik-team.yaml", async () => {
     const portability = companyPortabilityService({} as any);
 
     companySvc.create.mockResolvedValue({
@@ -1534,7 +1534,7 @@ describe("company portability", () => {
     const preview = await portability.previewImport({
       source: {
         type: "inline",
-        rootPath: "paperclip-demo",
+        rootPath: "agentik-demo",
         files: {
           "COMPANY.md": [
             "---",
@@ -1587,7 +1587,7 @@ describe("company portability", () => {
     await portability.importBundle({
       source: {
         type: "inline",
-        rootPath: "paperclip-demo",
+        rootPath: "agentik-demo",
         files: {
           "COMPANY.md": [
             "---",
@@ -1683,7 +1683,7 @@ describe("company portability", () => {
       },
     });
 
-    const extension = asTextFile(exported.files[".paperclip.yaml"]);
+    const extension = asTextFile(exported.files[".agentik-team.yaml"]);
     expect(extension).toContain("APIKEY:");
     expect(extension).toContain("GITHUBAUTH:");
     expect(extension).toContain("PRIVATEKEY:");
@@ -1744,7 +1744,7 @@ describe("company portability", () => {
     expect(agentSvc.create).toHaveBeenCalledWith("company-imported", expect.objectContaining({
       adapterConfig: expect.objectContaining({
         paperclipSkillSync: {
-          desiredSkills: [paperclipKey],
+          desiredSkills: [agentikKey],
         },
       }),
     }));
@@ -1791,7 +1791,7 @@ describe("company portability", () => {
       data: Buffer.from("png-bytes").toString("base64"),
       contentType: "image/png",
     };
-    exported.files[".paperclip.yaml"] = `${exported.files[".paperclip.yaml"]}`.replace(
+    exported.files[".agentik-team.yaml"] = `${exported.files[".agentik-team.yaml"]}`.replace(
       'brandColor: "#5c5fff"\n',
       'brandColor: "#5c5fff"\n  logoPath: "images/company-logo.png"\n',
     );

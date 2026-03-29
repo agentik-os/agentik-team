@@ -82,7 +82,7 @@ const PROTOCOL_VERSION = 3;
 const DEFAULT_SCOPES = ["operator.admin"];
 const DEFAULT_CLIENT_ID = "gateway-client";
 const DEFAULT_CLIENT_MODE = "backend";
-const DEFAULT_CLIENT_VERSION = "paperclip";
+const DEFAULT_CLIENT_VERSION = "agentik-team";
 const DEFAULT_ROLE = "operator";
 
 const SENSITIVE_LOG_KEY_PATTERN =
@@ -132,9 +132,9 @@ function resolveSessionKey(input: {
   runId: string;
   issueId: string | null;
 }): string {
-  const fallback = input.configuredSessionKey ?? "paperclip";
-  if (input.strategy === "run") return `paperclip:run:${input.runId}`;
-  if (input.strategy === "issue" && input.issueId) return `paperclip:issue:${input.issueId}`;
+  const fallback = input.configuredSessionKey ?? "agentik-team";
+  if (input.strategy === "run") return `agentik-team:run:${input.runId}`;
+  if (input.strategy === "issue" && input.issueId) return `agentik-team:issue:${input.issueId}`;
   return fallback;
 }
 
@@ -301,7 +301,7 @@ function buildWakePayload(ctx: AdapterExecutionContext): WakePayload {
   };
 }
 
-function resolvePaperclipApiUrlOverride(value: unknown): string | null {
+function resolveAgentikApiUrlOverride(value: unknown): string | null {
   const raw = nonEmpty(value);
   if (!raw) return null;
   try {
@@ -313,30 +313,30 @@ function resolvePaperclipApiUrlOverride(value: unknown): string | null {
   }
 }
 
-function buildPaperclipEnvForWake(ctx: AdapterExecutionContext, wakePayload: WakePayload): Record<string, string> {
-  const paperclipApiUrlOverride = resolvePaperclipApiUrlOverride(ctx.config.paperclipApiUrl);
-  const paperclipEnv: Record<string, string> = {
+function buildAgentikEnvForWake(ctx: AdapterExecutionContext, wakePayload: WakePayload): Record<string, string> {
+  const agentikApiUrlOverride = resolveAgentikApiUrlOverride(ctx.config.paperclipApiUrl);
+  const agentikEnv: Record<string, string> = {
     ...buildPaperclipEnv(ctx.agent),
     AGENTIK_RUN_ID: ctx.runId,
   };
 
-  if (paperclipApiUrlOverride) {
-    paperclipEnv.AGENTIK_API_URL = paperclipApiUrlOverride;
+  if (agentikApiUrlOverride) {
+    agentikEnv.AGENTIK_API_URL = agentikApiUrlOverride;
   }
-  if (wakePayload.taskId) paperclipEnv.AGENTIK_TASK_ID = wakePayload.taskId;
-  if (wakePayload.wakeReason) paperclipEnv.AGENTIK_WAKE_REASON = wakePayload.wakeReason;
-  if (wakePayload.wakeCommentId) paperclipEnv.AGENTIK_WAKE_COMMENT_ID = wakePayload.wakeCommentId;
-  if (wakePayload.approvalId) paperclipEnv.AGENTIK_APPROVAL_ID = wakePayload.approvalId;
-  if (wakePayload.approvalStatus) paperclipEnv.AGENTIK_APPROVAL_STATUS = wakePayload.approvalStatus;
+  if (wakePayload.taskId) agentikEnv.AGENTIK_TASK_ID = wakePayload.taskId;
+  if (wakePayload.wakeReason) agentikEnv.AGENTIK_WAKE_REASON = wakePayload.wakeReason;
+  if (wakePayload.wakeCommentId) agentikEnv.AGENTIK_WAKE_COMMENT_ID = wakePayload.wakeCommentId;
+  if (wakePayload.approvalId) agentikEnv.AGENTIK_APPROVAL_ID = wakePayload.approvalId;
+  if (wakePayload.approvalStatus) agentikEnv.AGENTIK_APPROVAL_STATUS = wakePayload.approvalStatus;
   if (wakePayload.issueIds.length > 0) {
-    paperclipEnv.AGENTIK_LINKED_ISSUE_IDS = wakePayload.issueIds.join(",");
+    agentikEnv.AGENTIK_LINKED_ISSUE_IDS = wakePayload.issueIds.join(",");
   }
 
-  return paperclipEnv;
+  return agentikEnv;
 }
 
-function buildWakeText(payload: WakePayload, paperclipEnv: Record<string, string>): string {
-  const claimedApiKeyPath = "~/.openclaw/workspace/paperclip-claimed-api-key.json";
+function buildWakeText(payload: WakePayload, agentikEnv: Record<string, string>): string {
+  const claimedApiKeyPath = "~/.openclaw/workspace/agentik-team-claimed-api-key.json";
   const orderedKeys = [
     "AGENTIK_RUN_ID",
     "AGENTIK_AGENT_ID",
@@ -352,13 +352,13 @@ function buildWakeText(payload: WakePayload, paperclipEnv: Record<string, string
 
   const envLines: string[] = [];
   for (const key of orderedKeys) {
-    const value = paperclipEnv[key];
+    const value = agentikEnv[key];
     if (!value) continue;
     envLines.push(`${key}=${value}`);
   }
 
   const issueIdHint = payload.taskId ?? payload.issueId ?? "";
-  const apiBaseHint = paperclipEnv.AGENTIK_API_URL ?? "<set AGENTIK_API_URL>";
+  const apiBaseHint = agentikEnv.AGENTIK_API_URL ?? "<set AGENTIK_API_URL>";
 
   const lines = [
     "Paperclip wake event for a cloud adapter.",
@@ -415,13 +415,13 @@ function appendWakeText(baseText: string, wakeText: string): string {
   return trimmedBase.length > 0 ? `${trimmedBase}\n\n${wakeText}` : wakeText;
 }
 
-function buildStandardPaperclipPayload(
+function buildStandardAgentikPayload(
   ctx: AdapterExecutionContext,
   wakePayload: WakePayload,
-  paperclipEnv: Record<string, string>,
+  agentikEnv: Record<string, string>,
   payloadTemplate: Record<string, unknown>,
 ): Record<string, unknown> {
-  const templatePaperclip = parseObject(payloadTemplate.paperclip);
+  const templateAgentik = parseObject(payloadTemplate.paperclip);
   const workspace = asRecord(ctx.context.paperclipWorkspace);
   const workspaces = Array.isArray(ctx.context.paperclipWorkspaces)
     ? ctx.context.paperclipWorkspaces.filter((entry): entry is Record<string, unknown> => Boolean(asRecord(entry)))
@@ -445,7 +445,7 @@ function buildStandardPaperclipPayload(
     wakeCommentId: wakePayload.wakeCommentId,
     approvalId: wakePayload.approvalId,
     approvalStatus: wakePayload.approvalStatus,
-    apiUrl: paperclipEnv.AGENTIK_API_URL ?? null,
+    apiUrl: agentikEnv.AGENTIK_API_URL ?? null,
   };
 
   if (workspace) {
@@ -713,7 +713,7 @@ class GatewayWsClient {
 
   close() {
     if (!this.ws) return;
-    this.ws.close(1000, "paperclip-complete");
+    this.ws.close(1000, "agentik-team-complete");
     this.ws = null;
   }
 
@@ -1052,8 +1052,8 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   const disableDeviceAuth = parseBoolean(ctx.config.disableDeviceAuth, false);
 
   const wakePayload = buildWakePayload(ctx);
-  const paperclipEnv = buildPaperclipEnvForWake(ctx, wakePayload);
-  const wakeText = buildWakeText(wakePayload, paperclipEnv);
+  const agentikEnv = buildAgentikEnvForWake(ctx, wakePayload);
+  const wakeText = buildWakeText(wakePayload, agentikEnv);
 
   const sessionKeyStrategy = normalizeSessionKeyStrategy(ctx.config.sessionKeyStrategy);
   const configuredSessionKey = nonEmpty(ctx.config.sessionKey);
@@ -1066,7 +1066,7 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
 
   const templateMessage = nonEmpty(payloadTemplate.message) ?? nonEmpty(payloadTemplate.text);
   const message = templateMessage ? appendWakeText(templateMessage, wakeText) : wakeText;
-  const paperclipPayload = buildStandardPaperclipPayload(ctx, wakePayload, paperclipEnv, payloadTemplate);
+  const agentikPayload = buildStandardAgentikPayload(ctx, wakePayload, agentikEnv, payloadTemplate);
 
   const agentParams: Record<string, unknown> = {
     ...payloadTemplate,

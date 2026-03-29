@@ -10,7 +10,7 @@ function findConfigFileFromAncestors(startDir: string): string | null {
   let currentDir = absoluteStartDir;
 
   while (true) {
-    const candidate = path.resolve(currentDir, ".paperclip", AGENTIK_CONFIG_BASENAME);
+    const candidate = path.resolve(currentDir, ".agentik-team", AGENTIK_CONFIG_BASENAME);
     if (fs.existsSync(candidate)) {
       return candidate;
     }
@@ -23,12 +23,12 @@ function findConfigFileFromAncestors(startDir: string): string | null {
   return null;
 }
 
-export function resolvePaperclipConfigPath(overridePath?: string): string {
+export function resolveAgentikConfigPath(overridePath?: string): string {
   if (overridePath) return path.resolve(overridePath);
   if (process.env.AGENTIK_CONFIG) return path.resolve(process.env.AGENTIK_CONFIG);
   return findConfigFileFromAncestors(process.cwd()) ?? resolveDefaultConfigPath();
 }
 
-export function resolvePaperclipEnvPath(overrideConfigPath?: string): string {
-  return path.resolve(path.dirname(resolvePaperclipConfigPath(overrideConfigPath)), AGENTIK_ENV_FILENAME);
+export function resolveAgentikEnvPath(overrideConfigPath?: string): string {
+  return path.resolve(path.dirname(resolveAgentikConfigPath(overrideConfigPath)), AGENTIK_ENV_FILENAME);
 }

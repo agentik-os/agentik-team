@@ -4,7 +4,7 @@
  * This service is the entry point for the plugin system's I/O boundary:
  *
  * 1. **Discovery** — Scans the local plugin directory
- *    (`~/.paperclip/plugins/`) and `node_modules` for packages matching
+ *    (`~/.agentik-team/plugins/`) and `node_modules` for packages matching
  *    the `agentik-plugin-*` naming convention. Aggregates results with
  *    path-based deduplication.
  *
@@ -72,7 +72,7 @@ export const NPM_PLUGIN_PACKAGE_PREFIX = "agentik-plugin-";
  */
 export const DEFAULT_LOCAL_PLUGIN_DIR = path.join(
   os.homedir(),
-  ".paperclip",
+  ".agentik-team",
   "plugins",
 );
 
@@ -104,7 +104,7 @@ export interface DiscoveredPlugin {
  * @see PLUGIN_SPEC.md §8.1 — On-Disk Layout
  */
 export type PluginSource =
-  | "local-filesystem"  // ~/.paperclip/plugins/ local directory
+  | "local-filesystem"  // ~/.agentik-team/plugins/ local directory
   | "npm"               // npm packages matching agentik-plugin-* convention
   | "registry";         // future: remote plugin registry URL
 
@@ -143,7 +143,7 @@ function getDeclaredPageRoutePaths(manifest: PaperclipPluginManifestV1): string[
 export interface PluginLoaderOptions {
   /**
    * Path to the local plugin directory to scan.
-   * Defaults to ~/.paperclip/plugins/
+   * Defaults to ~/.agentik-team/plugins/
    */
   localPluginDir?: string;
 
@@ -352,8 +352,8 @@ export interface PluginLoader {
    * the "paperclipPlugin.manifest" key, loads the manifest module, and
    * validates it against the plugin manifest schema.
    *
-   * Returns null if the package is not a Paperclip plugin.
-   * Throws if the package is a Paperclip plugin but the manifest is invalid.
+   * Returns null if the package is not an Agentik Team plugin.
+   * Throws if the package is an Agentik Team plugin but the manifest is invalid.
    *
    * @see PLUGIN_SPEC.md §10 — Package Contract
    */
@@ -500,7 +500,7 @@ export interface PluginLoader {
 // ---------------------------------------------------------------------------
 
 /**
- * Check whether a package name matches the Paperclip plugin naming convention.
+ * Check whether a package name matches the Agentik Team plugin naming convention.
  * Accepts both the "agentik-plugin-" prefix and scoped "@scope/plugin-" packages.
  *
  * @see PLUGIN_SPEC.md §10 — Package Contract
@@ -868,7 +868,7 @@ export function pluginLoader(
     const manifestPath = resolveManifestPath(resolvedPackagePath, pkgJson);
     if (!manifestPath || !existsSync(manifestPath)) {
       throw new Error(
-        `Package ${resolvedPackageName} at ${resolvedPackagePath} does not appear to be a Paperclip plugin (no manifest found).`,
+        `Package ${resolvedPackageName} at ${resolvedPackagePath} does not appear to be an Agentik Team plugin (no manifest found).`,
       );
     }
 
@@ -941,7 +941,7 @@ export function pluginLoader(
 
   /**
    * Build a DiscoveredPlugin from a resolved package directory, or null
-   * if the package is not a Paperclip plugin.
+   * if the package is not an Agentik Team plugin.
    */
   async function buildDiscoveredPlugin(
     packagePath: string,

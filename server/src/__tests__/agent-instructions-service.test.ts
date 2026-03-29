@@ -42,11 +42,11 @@ describe("agent instructions service", () => {
   });
 
   it("copies the existing bundle into the managed root when switching to managed mode", async () => {
-    const paperclipHome = await makeTempDir("paperclip-agent-instructions-home-");
-    const externalRoot = await makeTempDir("paperclip-agent-instructions-external-");
-    cleanupDirs.add(paperclipHome);
+    const agentikHome = await makeTempDir("agentik-agent-instructions-home-");
+    const externalRoot = await makeTempDir("agentik-agent-instructions-external-");
+    cleanupDirs.add(agentikHome);
     cleanupDirs.add(externalRoot);
-    process.env.AGENTIK_HOME = paperclipHome;
+    process.env.AGENTIK_HOME = agentikHome;
     process.env.AGENTIK_INSTANCE_ID = "test-instance";
 
     await fs.writeFile(path.join(externalRoot, "AGENTS.md"), "# External Agent\n", "utf8");
@@ -66,7 +66,7 @@ describe("agent instructions service", () => {
     expect(result.bundle.mode).toBe("managed");
     expect(result.bundle.managedRootPath).toBe(
       path.join(
-        paperclipHome,
+        agentikHome,
         "instances",
         "test-instance",
         "companies",
@@ -82,9 +82,9 @@ describe("agent instructions service", () => {
   });
 
   it("creates the target entry file when switching to a new external root", async () => {
-    const paperclipHome = await makeTempDir("paperclip-agent-instructions-home-");
+    const agentikHome = await makeTempDir("agentik-agent-instructions-home-");
     const managedRoot = path.join(
-      paperclipHome,
+      agentikHome,
       "instances",
       "test-instance",
       "companies",
@@ -93,10 +93,10 @@ describe("agent instructions service", () => {
       "agent-1",
       "instructions",
     );
-    const externalRoot = await makeTempDir("paperclip-agent-instructions-new-external-");
-    cleanupDirs.add(paperclipHome);
+    const externalRoot = await makeTempDir("agentik-agent-instructions-new-external-");
+    cleanupDirs.add(agentikHome);
     cleanupDirs.add(externalRoot);
-    process.env.AGENTIK_HOME = paperclipHome;
+    process.env.AGENTIK_HOME = agentikHome;
     process.env.AGENTIK_INSTANCE_ID = "test-instance";
 
     await fs.mkdir(managedRoot, { recursive: true });
@@ -122,7 +122,7 @@ describe("agent instructions service", () => {
   });
 
   it("filters junk files, dependency bundles, and python caches from bundle listings and exports", async () => {
-    const externalRoot = await makeTempDir("paperclip-agent-instructions-ignore-");
+    const externalRoot = await makeTempDir("agentik-agent-instructions-ignore-");
     cleanupDirs.add(externalRoot);
 
     await fs.writeFile(path.join(externalRoot, "AGENTS.md"), "# External Agent\n", "utf8");
@@ -163,13 +163,13 @@ describe("agent instructions service", () => {
   });
 
   it("recovers a managed bundle from disk when bundle config metadata is missing", async () => {
-    const paperclipHome = await makeTempDir("paperclip-agent-instructions-recover-");
-    cleanupDirs.add(paperclipHome);
-    process.env.AGENTIK_HOME = paperclipHome;
+    const agentikHome = await makeTempDir("agentik-agent-instructions-recover-");
+    cleanupDirs.add(agentikHome);
+    process.env.AGENTIK_HOME = agentikHome;
     process.env.AGENTIK_INSTANCE_ID = "test-instance";
 
     const managedRoot = path.join(
-      paperclipHome,
+      agentikHome,
       "instances",
       "test-instance",
       "companies",
@@ -194,15 +194,15 @@ describe("agent instructions service", () => {
   });
 
   it("prefers the managed bundle on disk when managed metadata points at a stale root", async () => {
-    const paperclipHome = await makeTempDir("paperclip-agent-instructions-stale-managed-");
-    const staleRoot = await makeTempDir("paperclip-agent-instructions-stale-root-");
-    cleanupDirs.add(paperclipHome);
+    const agentikHome = await makeTempDir("agentik-agent-instructions-stale-managed-");
+    const staleRoot = await makeTempDir("agentik-agent-instructions-stale-root-");
+    cleanupDirs.add(agentikHome);
     cleanupDirs.add(staleRoot);
-    process.env.AGENTIK_HOME = paperclipHome;
+    process.env.AGENTIK_HOME = agentikHome;
     process.env.AGENTIK_INSTANCE_ID = "test-instance";
 
     const managedRoot = path.join(
-      paperclipHome,
+      agentikHome,
       "instances",
       "test-instance",
       "companies",
@@ -237,15 +237,15 @@ describe("agent instructions service", () => {
   });
 
   it("heals stale managed metadata when writing bundle files", async () => {
-    const paperclipHome = await makeTempDir("paperclip-agent-instructions-heal-write-");
-    const staleRoot = await makeTempDir("paperclip-agent-instructions-heal-write-stale-");
-    cleanupDirs.add(paperclipHome);
+    const agentikHome = await makeTempDir("agentik-agent-instructions-heal-write-");
+    const staleRoot = await makeTempDir("agentik-agent-instructions-heal-write-stale-");
+    cleanupDirs.add(agentikHome);
     cleanupDirs.add(staleRoot);
-    process.env.AGENTIK_HOME = paperclipHome;
+    process.env.AGENTIK_HOME = agentikHome;
     process.env.AGENTIK_INSTANCE_ID = "test-instance";
 
     const managedRoot = path.join(
-      paperclipHome,
+      agentikHome,
       "instances",
       "test-instance",
       "companies",
@@ -277,15 +277,15 @@ describe("agent instructions service", () => {
   });
 
   it("heals stale managed metadata when deleting bundle files", async () => {
-    const paperclipHome = await makeTempDir("paperclip-agent-instructions-heal-delete-");
-    const staleRoot = await makeTempDir("paperclip-agent-instructions-heal-delete-stale-");
-    cleanupDirs.add(paperclipHome);
+    const agentikHome = await makeTempDir("agentik-agent-instructions-heal-delete-");
+    const staleRoot = await makeTempDir("agentik-agent-instructions-heal-delete-stale-");
+    cleanupDirs.add(agentikHome);
     cleanupDirs.add(staleRoot);
-    process.env.AGENTIK_HOME = paperclipHome;
+    process.env.AGENTIK_HOME = agentikHome;
     process.env.AGENTIK_INSTANCE_ID = "test-instance";
 
     const managedRoot = path.join(
-      paperclipHome,
+      agentikHome,
       "instances",
       "test-instance",
       "companies",
@@ -319,15 +319,15 @@ describe("agent instructions service", () => {
   });
 
   it("recovers the managed bundle when stale root metadata is present but mode is missing", async () => {
-    const paperclipHome = await makeTempDir("paperclip-agent-instructions-partial-managed-");
-    const staleRoot = await makeTempDir("paperclip-agent-instructions-partial-root-");
-    cleanupDirs.add(paperclipHome);
+    const agentikHome = await makeTempDir("agentik-agent-instructions-partial-managed-");
+    const staleRoot = await makeTempDir("agentik-agent-instructions-partial-root-");
+    cleanupDirs.add(agentikHome);
     cleanupDirs.add(staleRoot);
-    process.env.AGENTIK_HOME = paperclipHome;
+    process.env.AGENTIK_HOME = agentikHome;
     process.env.AGENTIK_INSTANCE_ID = "test-instance";
 
     const managedRoot = path.join(
-      paperclipHome,
+      agentikHome,
       "instances",
       "test-instance",
       "companies",

@@ -65,7 +65,7 @@ function buildLegacyConfig(sharedRoot: string) {
         baseDir: path.join(sharedRoot, "data", "storage"),
       },
       s3: {
-        bucket: "paperclip",
+        bucket: "agentik-team",
         region: "us-east-1",
         prefix: "",
         forcePathStyle: false,
@@ -83,20 +83,20 @@ function buildLegacyConfig(sharedRoot: string) {
 
 describe("worktree config repair", () => {
   it("repairs legacy repo-local worktree config and env files into an isolated instance", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-worktree-repair-"));
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-worktree-repair-"));
     const worktreeRoot = path.join(tempRoot, "PAP-884-ai-commits-component");
-    const paperclipDir = path.join(worktreeRoot, ".paperclip");
-    const configPath = path.join(paperclipDir, "config.json");
-    const envPath = path.join(paperclipDir, ".env");
-    const sharedRoot = path.join(tempRoot, ".paperclip", "instances", "default");
-    const isolatedHome = path.join(tempRoot, ".paperclip-worktrees");
+    const agentikDir = path.join(worktreeRoot, ".agentik-team");
+    const configPath = path.join(agentikDir, "config.json");
+    const envPath = path.join(agentikDir, ".env");
+    const sharedRoot = path.join(tempRoot, ".agentik-team", "instances", "default");
+    const isolatedHome = path.join(tempRoot, ".agentik-team-worktrees");
 
-    await fs.mkdir(paperclipDir, { recursive: true });
+    await fs.mkdir(agentikDir, { recursive: true });
     await fs.writeFile(configPath, JSON.stringify(buildLegacyConfig(sharedRoot), null, 2) + "\n", "utf8");
     await fs.writeFile(
       envPath,
       [
-        "# Paperclip environment variables",
+        "# Agentik Team environment variables",
         "AGENTIK_IN_WORKTREE=true",
         "AGENTIK_WORKTREE_NAME=PAP-884-ai-commits-component",
         "AGENTIK_AGENT_JWT_SECRET=shared-secret",
@@ -140,22 +140,22 @@ describe("worktree config repair", () => {
   });
 
   it("avoids sibling worktree ports when repairing legacy configs", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-worktree-repair-ports-"));
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-worktree-repair-ports-"));
     const worktreeRoot = path.join(tempRoot, "PAP-880-thumbs-capture-for-evals-feature");
-    const paperclipDir = path.join(worktreeRoot, ".paperclip");
-    const configPath = path.join(paperclipDir, "config.json");
-    const envPath = path.join(paperclipDir, ".env");
-    const sharedRoot = path.join(tempRoot, ".paperclip", "instances", "default");
-    const isolatedHome = path.join(tempRoot, ".paperclip-worktrees");
+    const agentikDir = path.join(worktreeRoot, ".agentik-team");
+    const configPath = path.join(agentikDir, "config.json");
+    const envPath = path.join(agentikDir, ".env");
+    const sharedRoot = path.join(tempRoot, ".agentik-team", "instances", "default");
+    const isolatedHome = path.join(tempRoot, ".agentik-team-worktrees");
     const siblingInstanceRoot = path.join(isolatedHome, "instances", "pap-878-create-a-mine-tab-in-inbox");
 
-    await fs.mkdir(paperclipDir, { recursive: true });
+    await fs.mkdir(agentikDir, { recursive: true });
     await fs.mkdir(siblingInstanceRoot, { recursive: true });
     await fs.writeFile(configPath, JSON.stringify(buildLegacyConfig(sharedRoot), null, 2) + "\n", "utf8");
     await fs.writeFile(
       envPath,
       [
-        "# Paperclip environment variables",
+        "# Agentik Team environment variables",
         "AGENTIK_IN_WORKTREE=true",
         "AGENTIK_WORKTREE_NAME=PAP-880-thumbs-capture-for-evals-feature",
         "",
@@ -207,19 +207,19 @@ describe("worktree config repair", () => {
   });
 
   it("rebalances duplicate ports for already isolated worktree configs", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-worktree-rebalance-"));
-    const isolatedHome = path.join(tempRoot, ".paperclip-worktrees");
-    const repoWorktreesRoot = path.join(tempRoot, "repo", ".paperclip", "worktrees");
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-worktree-rebalance-"));
+    const isolatedHome = path.join(tempRoot, ".agentik-team-worktrees");
+    const repoWorktreesRoot = path.join(tempRoot, "repo", ".agentik-team", "worktrees");
     const siblingWorktreeRoot = path.join(repoWorktreesRoot, "PAP-878-create-a-mine-tab-in-inbox");
     const siblingInstanceRoot = path.join(isolatedHome, "instances", "pap-878-create-a-mine-tab-in-inbox");
     const currentWorktreeRoot = path.join(repoWorktreesRoot, "PAP-884-ai-commits-component");
-    const paperclipDir = path.join(currentWorktreeRoot, ".paperclip");
-    const configPath = path.join(paperclipDir, "config.json");
-    const envPath = path.join(paperclipDir, ".env");
+    const agentikDir = path.join(currentWorktreeRoot, ".agentik-team");
+    const configPath = path.join(agentikDir, "config.json");
+    const envPath = path.join(agentikDir, ".env");
     const currentInstanceRoot = path.join(isolatedHome, "instances", "pap-884-ai-commits-component");
-    const siblingConfigPath = path.join(siblingWorktreeRoot, ".paperclip", "config.json");
+    const siblingConfigPath = path.join(siblingWorktreeRoot, ".agentik-team", "config.json");
 
-    await fs.mkdir(paperclipDir, { recursive: true });
+    await fs.mkdir(agentikDir, { recursive: true });
     await fs.mkdir(path.dirname(siblingConfigPath), { recursive: true });
     await fs.writeFile(
       configPath,
@@ -255,7 +255,7 @@ describe("worktree config repair", () => {
               baseDir: path.join(currentInstanceRoot, "data", "storage"),
             },
             s3: {
-              bucket: "paperclip",
+              bucket: "agentik-team",
               region: "us-east-1",
               prefix: "",
               forcePathStyle: false,
@@ -277,7 +277,7 @@ describe("worktree config repair", () => {
     await fs.writeFile(
       envPath,
       [
-        "# Paperclip environment variables",
+        "# Agentik Team environment variables",
         "AGENTIK_IN_WORKTREE=true",
         "AGENTIK_WORKTREE_NAME=PAP-884-ai-commits-component",
         "",
@@ -329,14 +329,14 @@ describe("worktree config repair", () => {
   });
 
   it("persists runtime-selected worktree ports back into config", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-worktree-ports-"));
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "agentik-worktree-ports-"));
     const worktreeRoot = path.join(tempRoot, "PAP-878-create-a-mine-tab-in-inbox");
-    const paperclipDir = path.join(worktreeRoot, ".paperclip");
-    const configPath = path.join(paperclipDir, "config.json");
-    const isolatedHome = path.join(tempRoot, ".paperclip-worktrees");
+    const agentikDir = path.join(worktreeRoot, ".agentik-team");
+    const configPath = path.join(agentikDir, "config.json");
+    const isolatedHome = path.join(tempRoot, ".agentik-team-worktrees");
     const instanceRoot = path.join(isolatedHome, "instances", "pap-878-create-a-mine-tab-in-inbox");
 
-    await fs.mkdir(paperclipDir, { recursive: true });
+    await fs.mkdir(agentikDir, { recursive: true });
     await fs.writeFile(
       configPath,
       JSON.stringify(
@@ -371,7 +371,7 @@ describe("worktree config repair", () => {
               baseDir: path.join(instanceRoot, "data", "storage"),
             },
             s3: {
-              bucket: "paperclip",
+              bucket: "agentik-team",
               region: "us-east-1",
               prefix: "",
               forcePathStyle: false,

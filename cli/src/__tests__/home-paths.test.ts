@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   describeLocalInstancePaths,
   expandHomePrefix,
-  resolvePaperclipHomeDir,
-  resolvePaperclipInstanceId,
+  resolveAgentikHomeDir,
+  resolveAgentikInstanceId,
 } from "../config/home.js";
 
 const ORIGINAL_ENV = { ...process.env };
@@ -15,26 +15,26 @@ describe("home path resolution", () => {
     process.env = { ...ORIGINAL_ENV };
   });
 
-  it("defaults to ~/.paperclip and default instance", () => {
+  it("defaults to ~/.agentik-team and default instance", () => {
     delete process.env.AGENTIK_HOME;
     delete process.env.AGENTIK_INSTANCE_ID;
 
     const paths = describeLocalInstancePaths();
-    expect(paths.homeDir).toBe(path.resolve(os.homedir(), ".paperclip"));
+    expect(paths.homeDir).toBe(path.resolve(os.homedir(), ".agentik-team"));
     expect(paths.instanceId).toBe("default");
-    expect(paths.configPath).toBe(path.resolve(os.homedir(), ".paperclip", "instances", "default", "config.json"));
+    expect(paths.configPath).toBe(path.resolve(os.homedir(), ".agentik-team", "instances", "default", "config.json"));
   });
 
   it("supports AGENTIK_HOME and explicit instance ids", () => {
-    process.env.AGENTIK_HOME = "~/paperclip-home";
+    process.env.AGENTIK_HOME = "~/agentik-home";
 
-    const home = resolvePaperclipHomeDir();
-    expect(home).toBe(path.resolve(os.homedir(), "paperclip-home"));
-    expect(resolvePaperclipInstanceId("dev_1")).toBe("dev_1");
+    const home = resolveAgentikHomeDir();
+    expect(home).toBe(path.resolve(os.homedir(), "agentik-home"));
+    expect(resolveAgentikInstanceId("dev_1")).toBe("dev_1");
   });
 
   it("rejects invalid instance ids", () => {
-    expect(() => resolvePaperclipInstanceId("bad/id")).toThrow(/Invalid instance id/);
+    expect(() => resolveAgentikInstanceId("bad/id")).toThrow(/Invalid instance id/);
   });
 
   it("expands ~ prefixes", () => {

@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts";
 import pc from "picocolors";
 import { readConfig, writeConfig, configExists, resolveConfigPath } from "../config/store.js";
-import type { PaperclipConfig } from "../config/schema.js";
+import type { AgentikConfig } from "../config/schema.js";
 import { ensureLocalSecretsKeyFile } from "../config/secrets-key.js";
 import { promptDatabase } from "../prompts/database.js";
 import { promptLlm } from "../prompts/llm.js";
@@ -13,9 +13,9 @@ import {
   resolveDefaultBackupDir,
   resolveDefaultEmbeddedPostgresDir,
   resolveDefaultLogsDir,
-  resolvePaperclipInstanceId,
+  resolveAgentikInstanceId,
 } from "../config/home.js";
-import { printPaperclipCliBanner } from "../utils/banner.js";
+import { printAgentikCliBanner } from "../utils/banner.js";
 
 type Section = "llm" | "database" | "logging" | "server" | "storage" | "secrets";
 
@@ -28,8 +28,8 @@ const SECTION_LABELS: Record<Section, string> = {
   secrets: "Secrets",
 };
 
-function defaultConfig(): PaperclipConfig {
-  const instanceId = resolvePaperclipInstanceId();
+function defaultConfig(): AgentikConfig {
+  const instanceId = resolveAgentikInstanceId();
   return {
     $meta: {
       version: 1,
@@ -72,8 +72,8 @@ export async function configure(opts: {
   config?: string;
   section?: string;
 }): Promise<void> {
-  printPaperclipCliBanner();
-  p.intro(pc.bgCyan(pc.black(" paperclip configure ")));
+  printAgentikCliBanner();
+  p.intro(pc.bgCyan(pc.black(" agentik-team configure ")));
   const configPath = resolveConfigPath(opts.config);
 
   if (!configExists(opts.config)) {
@@ -82,7 +82,7 @@ export async function configure(opts: {
     return;
   }
 
-  let config: PaperclipConfig;
+  let config: AgentikConfig;
   try {
     config = readConfig(opts.config) ?? defaultConfig();
   } catch (err) {
