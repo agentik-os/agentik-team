@@ -60,16 +60,15 @@ export function actorMiddleware(db: Db, opts: ActorMiddlewareOptions): RequestHa
                 ),
               ),
           ]);
-          // Auto-promote first user to instance_admin when no admins exist
+          // Auto-promote first real (non-local-board) user to instance_admin
           if (!roleRow) {
-            const anyAdmin = await db
-              .select({ id: instanceUserRoles.id })
+            const anyRealAdmin = await db
+              .select({ id: instanceUserRoles.id, userId: instanceUserRoles.userId })
               .from(instanceUserRoles)
               .where(eq(instanceUserRoles.role, "instance_admin"))
-              .limit(1)
-              .then((rows) => rows[0] ?? null);
-            if (!anyAdmin) {
-              logger.info({ userId }, "No instance admin exists — auto-promoting first authenticated user");
+              .then((rows) => rows.filter((r) => r.userId !== "local-board"));
+            if (anyRealAdmin.length === 0) {
+              logger.info({ userId }, "No real instance admin exists — auto-promoting first authenticated user");
               await db.insert(instanceUserRoles).values({ userId, role: "instance_admin" }).onConflictDoNothing();
               roleRow = { id: "auto" };
             }
