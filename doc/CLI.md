@@ -1,6 +1,6 @@
 # CLI Reference
 
-Paperclip CLI now supports both:
+Agentik Team CLI now supports both:
 
 - instance setup/diagnostics (`onboard`, `doctor`, `configure`, `env`, `allowed-hostname`)
 - control-plane client operations (issues, approvals, agents, activity, dashboard)
@@ -54,16 +54,16 @@ All client commands support:
 
 Company-scoped commands also support `--company-id <id>`.
 
-Use `--data-dir` on any CLI command to isolate all default local state (config/context/db/logs/storage/secrets) away from `~/.paperclip`:
+Use `--data-dir` on any CLI command to isolate all default local state (config/context/db/logs/storage/secrets) away from `~/.agentik-team`:
 
 ```sh
-pnpm agentik-team run --data-dir ./tmp/paperclip-dev
-pnpm agentik-team issue list --data-dir ./tmp/paperclip-dev
+pnpm agentik-team run --data-dir ./tmp/agentik-team-dev
+pnpm agentik-team issue list --data-dir ./tmp/agentik-team-dev
 ```
 
 ## Context Profiles
 
-Store local defaults in `~/.paperclip/context.json`:
+Store local defaults in `~/.agentik-team/context.json`:
 
 ```sh
 pnpm agentik-team context set --api-base http://localhost:3100 --company-id <company-id>
@@ -119,10 +119,10 @@ pnpm agentik-team agent get <agent-id>
 pnpm agentik-team agent local-cli <agent-id-or-shortname> --company-id <company-id>
 ```
 
-`agent local-cli` is the quickest way to run local Claude/Codex manually as a Paperclip agent:
+`agent local-cli` is the quickest way to run local Claude/Codex manually as a Agentik Team agent:
 
 - creates a new long-lived agent API key
-- installs missing Paperclip skills into `~/.codex/skills` and `~/.claude/skills`
+- installs missing Agentik Team skills into `~/.codex/skills` and `~/.claude/skills`
 - prints `export ...` lines for `AGENTIK_API_URL`, `AGENTIK_COMPANY_ID`, `AGENTIK_AGENT_ID`, and `AGENTIK_API_KEY`
 
 Example for shortname-based local setup:
@@ -167,13 +167,13 @@ pnpm agentik-team heartbeat run --agent-id <agent-id> [--api-base http://localho
 
 ## Local Storage Defaults
 
-Default local instance root is `~/.paperclip/instances/default`:
+Default local instance root is `~/.agentik-team/instances/default`:
 
-- config: `~/.paperclip/instances/default/config.json`
-- embedded db: `~/.paperclip/instances/default/db`
-- logs: `~/.paperclip/instances/default/logs`
-- storage: `~/.paperclip/instances/default/data/storage`
-- secrets key: `~/.paperclip/instances/default/secrets/master.key`
+- config: `~/.agentik-team/instances/default/config.json`
+- embedded db: `~/.agentik-team/instances/default/db`
+- logs: `~/.agentik-team/instances/default/logs`
+- storage: `~/.agentik-team/instances/default/data/storage`
+- secrets key: `~/.agentik-team/instances/default/secrets/master.key`
 
 Override base home or instance with env vars:
 

@@ -1,4 +1,4 @@
-# Paperclip Create Agent API Reference
+# Agentik Team Create Agent API Reference
 
 ## Core Endpoints
 

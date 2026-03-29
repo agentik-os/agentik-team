@@ -97,11 +97,11 @@ pnpm agentik-team allowed-hostname my-tailscale-host
 
 | Data | Default Path |
 |------|-------------|
-| Config | `~/.paperclip/instances/default/config.json` |
-| Database | `~/.paperclip/instances/default/db` |
-| Logs | `~/.paperclip/instances/default/logs` |
-| Storage | `~/.paperclip/instances/default/data/storage` |
-| Secrets key | `~/.paperclip/instances/default/secrets/master.key` |
+| Config | `~/.agentik-team/instances/default/config.json` |
+| Database | `~/.agentik-team/instances/default/db` |
+| Logs | `~/.agentik-team/instances/default/logs` |
+| Storage | `~/.agentik-team/instances/default/data/storage` |
+| Secrets key | `~/.agentik-team/instances/default/secrets/master.key` |
 
 Override with:
 
@@ -112,6 +112,6 @@ AGENTIK_HOME=/custom/home AGENTIK_INSTANCE_ID=dev pnpm agentik-team run
 Or pass `--data-dir` directly on any command:
 
 ```sh
-pnpm agentik-team run --data-dir ./tmp/paperclip-dev
-pnpm agentik-team doctor --data-dir ./tmp/paperclip-dev
+pnpm agentik-team run --data-dir ./tmp/agentik-team-dev
+pnpm agentik-team doctor --data-dir ./tmp/agentik-team-dev
 ```

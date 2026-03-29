@@ -1,20 +1,20 @@
 FROM ubuntu:24.04
 
 ARG NODE_MAJOR=20
-ARG PAPERCLIPAI_VERSION=latest
+ARG AGENTIK_VERSION=latest
 ARG HOST_UID=10001
 
 ENV DEBIAN_FRONTEND=noninteractive \
-  AGENTIK_HOME=/paperclip \
+  AGENTIK_HOME=/agentik-team \
   AGENTIK_OPEN_ON_LISTEN=false \
   HOST=0.0.0.0 \
   PORT=3100 \
-  HOME=/home/paperclip \
+  HOME=/home/agentik \
   LANG=en_US.UTF-8 \
   LC_ALL=en_US.UTF-8 \
   NPM_CONFIG_UPDATE_NOTIFIER=false \
   NODE_MAJOR=${NODE_MAJOR} \
-  PAPERCLIPAI_VERSION=${PAPERCLIPAI_VERSION}
+  AGENTIK_VERSION=${AGENTIK_VERSION}
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates curl gnupg locales \
@@ -26,15 +26,15 @@ RUN apt-get update \
   && apt-get update \
   && apt-get install -y --no-install-recommends nodejs \
   && locale-gen en_US.UTF-8 \
-  && groupadd --gid 10001 paperclip \
-  && useradd --create-home --shell /bin/bash --uid "${HOST_UID}" --gid 10001 paperclip \
-  && mkdir -p /paperclip /home/paperclip/workspace \
-  && chown -R paperclip:paperclip /paperclip /home/paperclip \
+  && groupadd --gid 10001 agentik \
+  && useradd --create-home --shell /bin/bash --uid "${HOST_UID}" --gid 10001 agentik \
+  && mkdir -p /agentik-team /home/agentik/workspace \
+  && chown -R agentik:agentik /agentik-team /home/agentik \
   && rm -rf /var/lib/apt/lists/*
 
-VOLUME ["/paperclip"]
-WORKDIR /home/paperclip/workspace
+VOLUME ["/agentik-team"]
+WORKDIR /home/agentik/workspace
 EXPOSE 3100
-USER paperclip
+USER agentik
 
-CMD ["bash", "-lc", "set -euo pipefail; mkdir -p \"$AGENTIK_HOME\"; npx --yes \"agentik-team@${PAPERCLIPAI_VERSION}\" onboard --yes --data-dir \"$AGENTIK_HOME\""]
+CMD ["bash", "-lc", "set -euo pipefail; mkdir -p \"$AGENTIK_HOME\"; npx --yes \"agentik-team@${AGENTIK_VERSION}\" onboard --yes --data-dir \"$AGENTIK_HOME\""]

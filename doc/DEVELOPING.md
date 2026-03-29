@@ -71,16 +71,16 @@ pnpm agentik-team run
 
 ## Docker Quickstart (No local Node install)
 
-Build and run Paperclip in Docker:
+Build and run Agentik Team in Docker:
 
 ```sh
-docker build -t paperclip-local .
-docker run --name paperclip \
+docker build -t agentik-team-local .
+docker run --name agentik-team \
   -p 3100:3100 \
   -e HOST=0.0.0.0 \
-  -e AGENTIK_HOME=/paperclip \
-  -v "$(pwd)/data/docker-paperclip:/paperclip" \
-  paperclip-local
+  -e AGENTIK_HOME=/agentik-team \
+  -v "$(pwd)/data/docker-agentik-team:/agentik-team" \
+  agentik-team-local
 ```
 
 Or use Compose:
@@ -100,7 +100,7 @@ For a separate review-oriented container that keeps `codex`/`claude` login state
 For local development, leave `DATABASE_URL` unset.
 The server will automatically use embedded PostgreSQL and persist data at:
 
-- `~/.paperclip/instances/default/db`
+- `~/.agentik-team/instances/default/db`
 
 Override home and instance:
 
@@ -114,7 +114,7 @@ No Docker or external database is required for this mode.
 
 For local development, the default storage provider is `local_disk`, which persists uploaded images/attachments at:
 
-- `~/.paperclip/instances/default/data/storage`
+- `~/.agentik-team/instances/default/data/storage`
 
 Configure storage provider/settings:
 
@@ -124,35 +124,35 @@ pnpm agentik-team configure --section storage
 
 ## Default Agent Workspaces
 
-When a local agent run has no resolved project/session workspace, Paperclip falls back to an agent home workspace under the instance root:
+When a local agent run has no resolved project/session workspace, Agentik Team falls back to an agent home workspace under the instance root:
 
-- `~/.paperclip/instances/default/workspaces/<agent-id>`
+- `~/.agentik-team/instances/default/workspaces/<agent-id>`
 
 This path honors `AGENTIK_HOME` and `AGENTIK_INSTANCE_ID` in non-default setups.
 
-For `codex_local`, Paperclip also manages a per-company Codex home under the instance root and seeds it from the shared Codex login/config home (`$CODEX_HOME` or `~/.codex`):
+For `codex_local`, Agentik Team also manages a per-company Codex home under the instance root and seeds it from the shared Codex login/config home (`$CODEX_HOME` or `~/.codex`):
 
-- `~/.paperclip/instances/default/companies/<company-id>/codex-home`
+- `~/.agentik-team/instances/default/companies/<company-id>/codex-home`
 
 ## Worktree-local Instances
 
-When developing from multiple git worktrees, do not point two Paperclip servers at the same embedded PostgreSQL data directory.
+When developing from multiple git worktrees, do not point two Agentik Team servers at the same embedded PostgreSQL data directory.
 
-Instead, create a repo-local Paperclip config plus an isolated instance for the worktree:
+Instead, create a repo-local Agentik Team config plus an isolated instance for the worktree:
 
 ```sh
 agentik-team worktree init
 # or create the git worktree and initialize it in one step:
-pnpm agentik-team worktree:make paperclip-pr-432
+pnpm agentik-team worktree:make agentik-team-pr-432
 ```
 
 This command:
 
-- writes repo-local files at `.paperclip/config.json` and `.paperclip/.env`
-- creates an isolated instance under `~/.paperclip-worktrees/instances/<worktree-id>/`
+- writes repo-local files at `.agentik-team/config.json` and `.agentik-team/.env`
+- creates an isolated instance under `~/.agentik-team-worktrees/instances/<worktree-id>/`
 - when run inside a linked git worktree, mirrors the effective git hooks into that worktree's private git dir
 - picks a free app port and embedded PostgreSQL port
-- by default seeds the isolated DB in `minimal` mode from the current effective Paperclip instance/config (repo-local worktree config when present, otherwise the default instance) via a logical SQL snapshot
+- by default seeds the isolated DB in `minimal` mode from the current effective Agentik Team instance/config (repo-local worktree config when present, otherwise the default instance) via a logical SQL snapshot
 
 Seed modes:
 
@@ -160,7 +160,7 @@ Seed modes:
 - `full` makes a full logical clone of the source instance
 - `--no-seed` creates an empty isolated instance
 
-After `worktree init`, both the server and the CLI auto-load the repo-local `.paperclip/.env` when run inside that worktree, so normal commands like `pnpm dev`, `agentik-team doctor`, and `agentik-team db:backup` stay scoped to the worktree instance.
+After `worktree init`, both the server and the CLI auto-load the repo-local `.agentik-team/.env` when run inside that worktree, so normal commands like `pnpm dev`, `agentik-team doctor`, and `agentik-team db:backup` stay scoped to the worktree instance.
 
 That repo-local env also sets:
 
@@ -186,7 +186,7 @@ eval "$(agentik-team worktree env)"
 |---|---|
 | `--name <name>` | Display name used to derive the instance id |
 | `--instance <id>` | Explicit isolated instance id |
-| `--home <path>` | Home root for worktree instances (default: `~/.paperclip-worktrees`) |
+| `--home <path>` | Home root for worktree instances (default: `~/.agentik-team-worktrees`) |
 | `--from-config <path>` | Source config.json to seed from |
 | `--from-data-dir <path>` | Source AGENTIK_HOME used when deriving the source config |
 | `--from-instance <id>` | Source instance id (default: `default`) |
@@ -202,28 +202,28 @@ Examples:
 agentik-team worktree init --no-seed
 agentik-team worktree init --seed-mode full
 agentik-team worktree init --from-instance default
-agentik-team worktree init --from-data-dir ~/.paperclip
+agentik-team worktree init --from-data-dir ~/.agentik-team
 agentik-team worktree init --force
 ```
 
 Repair an already-created repo-managed worktree and reseed its isolated instance from the main default install:
 
 ```sh
-cd ~/.paperclip/worktrees/PAP-884-ai-commits-component
+cd ~/.agentik-team/worktrees/PAP-884-ai-commits-component
 pnpm agentik-team worktree init --force --seed-mode minimal \
   --name PAP-884-ai-commits-component \
-  --from-config ~/.paperclip/instances/default/config.json
+  --from-config ~/.agentik-team/instances/default/config.json
 ```
 
-That rewrites the worktree-local `.paperclip/config.json` + `.paperclip/.env`, recreates the isolated instance under `~/.paperclip-worktrees/instances/<worktree-id>/`, and preserves the git worktree contents themselves.
+That rewrites the worktree-local `.agentik-team/config.json` + `.agentik-team/.env`, recreates the isolated instance under `~/.agentik-team-worktrees/instances/<worktree-id>/`, and preserves the git worktree contents themselves.
 
-**`pnpm agentik-team worktree:make <name> [options]`** — Create `~/NAME` as a git worktree, then initialize an isolated Paperclip instance inside it. This combines `git worktree add` with `worktree init` in a single step.
+**`pnpm agentik-team worktree:make <name> [options]`** — Create `~/NAME` as a git worktree, then initialize an isolated Agentik Team instance inside it. This combines `git worktree add` with `worktree init` in a single step.
 
 | Option | Description |
 |---|---|
 | `--start-point <ref>` | Remote ref to base the new branch on (e.g. `origin/main`) |
 | `--instance <id>` | Explicit isolated instance id |
-| `--home <path>` | Home root for worktree instances (default: `~/.paperclip-worktrees`) |
+| `--home <path>` | Home root for worktree instances (default: `~/.agentik-team-worktrees`) |
 | `--from-config <path>` | Source config.json to seed from |
 | `--from-data-dir <path>` | Source AGENTIK_HOME used when deriving the source config |
 | `--from-instance <id>` | Source instance id (default: `default`) |
@@ -236,12 +236,12 @@ That rewrites the worktree-local `.paperclip/config.json` + `.paperclip/.env`, r
 Examples:
 
 ```sh
-pnpm agentik-team worktree:make paperclip-pr-432
+pnpm agentik-team worktree:make agentik-team-pr-432
 pnpm agentik-team worktree:make my-feature --start-point origin/main
 pnpm agentik-team worktree:make experiment --no-seed
 ```
 
-**`pnpm agentik-team worktree env [options]`** — Print shell exports for the current worktree-local Paperclip instance.
+**`pnpm agentik-team worktree env [options]`** — Print shell exports for the current worktree-local Agentik Team instance.
 
 | Option | Description |
 |---|---|
@@ -256,7 +256,7 @@ pnpm agentik-team worktree env --json
 eval "$(pnpm agentik-team worktree env)"
 ```
 
-For project execution worktrees, Paperclip can also run a project-defined provision command after it creates or reuses an isolated git worktree. Configure this on the project's execution workspace policy (`workspaceStrategy.provisionCommand`). The command runs inside the derived worktree and receives `AGENTIK_WORKSPACE_*`, `AGENTIK_PROJECT_ID`, `AGENTIK_AGENT_ID`, and `AGENTIK_ISSUE_*` environment variables so each repo can bootstrap itself however it wants.
+For project execution worktrees, Agentik Team can also run a project-defined provision command after it creates or reuses an isolated git worktree. Configure this on the project's execution workspace policy (`workspaceStrategy.provisionCommand`). The command runs inside the derived worktree and receives `AGENTIK_WORKSPACE_*`, `AGENTIK_PROJECT_ID`, `AGENTIK_AGENT_ID`, and `AGENTIK_ISSUE_*` environment variables so each repo can bootstrap itself however it wants.
 
 ## Quick Health Checks
 
@@ -277,7 +277,7 @@ Expected:
 To wipe local dev data and start fresh:
 
 ```sh
-rm -rf ~/.paperclip/instances/default/db
+rm -rf ~/.agentik-team/instances/default/db
 pnpm dev
 ```
 
@@ -287,12 +287,12 @@ If you set `DATABASE_URL`, the server will use that instead of embedded PostgreS
 
 ## Automatic DB Backups
 
-Paperclip can run automatic DB backups on a timer. Defaults:
+Agentik Team can run automatic DB backups on a timer. Defaults:
 
 - enabled
 - every 60 minutes
 - retain 30 days
-- backup dir: `~/.paperclip/instances/default/data/backups`
+- backup dir: `~/.agentik-team/instances/default/data/backups`
 
 Configure these in:
 
@@ -319,7 +319,7 @@ Environment overrides:
 
 Agent env vars now support secret references. By default, secret values are stored with local encryption and only secret refs are persisted in agent config.
 
-- Default local key path: `~/.paperclip/instances/default/secrets/master.key`
+- Default local key path: `~/.agentik-team/instances/default/secrets/master.key`
 - Override key material directly: `AGENTIK_SECRETS_MASTER_KEY`
 - Override key file path: `AGENTIK_SECRETS_MASTER_KEY_FILE`
 
@@ -359,7 +359,7 @@ Default behavior:
 
 ## CLI Client Operations
 
-Paperclip CLI now includes client-side control-plane commands in addition to setup commands.
+Agentik Team CLI now includes client-side control-plane commands in addition to setup commands.
 
 Quick examples:
 
@@ -392,7 +392,7 @@ Agent-oriented invite onboarding now exposes machine-readable API docs:
 - `GET /api/invites/:token/onboarding` returns onboarding manifest details (registration endpoint, claim endpoint template, skill install hints).
 - `GET /api/invites/:token/onboarding.txt` returns a plain-text onboarding doc intended for both human operators and agents (llm.txt-style handoff), including optional inviter message and suggested network host candidates.
 - `GET /api/skills/index` lists available skill documents.
-- `GET /api/skills/paperclip` returns the Paperclip heartbeat skill markdown.
+- `GET /api/skills/agentik-team` returns the Agentik Team heartbeat skill markdown.
 
 ## OpenClaw Join Smoke Test
 
@@ -440,11 +440,11 @@ Model behavior for this smoke script:
 
 State behavior for this smoke script:
 
-- defaults to isolated config dir `~/.openclaw-paperclip-smoke`
+- defaults to isolated config dir `~/.openclaw-agentik-team-smoke`
 - resets smoke agent state each run by default (`OPENCLAW_RESET_STATE=1`) to avoid stale provider/auth drift
 
 Networking behavior for this smoke script:
 
-- auto-detects and prints a Paperclip host URL reachable from inside OpenClaw Docker
+- auto-detects and prints a Agentik Team host URL reachable from inside OpenClaw Docker
 - default container-side host alias is `host.docker.internal` (override with `AGENTIK_HOST_FROM_CONTAINER` / `AGENTIK_HOST_PORT`)
-- if Paperclip rejects container hostnames in authenticated/private mode, allow `host.docker.internal` via `pnpm agentik-team allowed-hostname host.docker.internal` and restart Paperclip
+- if Agentik Team rejects container hostnames in authenticated/private mode, allow `host.docker.internal` via `pnpm agentik-team allowed-hostname host.docker.internal` and restart Agentik Team

@@ -1,5 +1,5 @@
 services:
-  paperclip:
+  agentik-team:
     build:
       context: .
       dockerfile: Dockerfile
@@ -7,7 +7,7 @@ services:
       - "${AGENTIK_PORT:-3100}:3100"
     environment:
       HOST: "0.0.0.0"
-      AGENTIK_HOME: "/paperclip"
+      AGENTIK_HOME: "/agentik-team"
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
       AGENTIK_DEPLOYMENT_MODE: "authenticated"
@@ -15,4 +15,4 @@ services:
       AGENTIK_PUBLIC_URL: "${AGENTIK_PUBLIC_URL:-http://localhost:3100}"
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set}"
     volumes:
-      - "${AGENTIK_DATA_DIR:-./data/docker-paperclip}:/paperclip"
+      - "${AGENTIK_DATA_DIR:-./data/docker-agentik-team}:/agentik-team"

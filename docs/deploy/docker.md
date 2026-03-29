@@ -3,7 +3,7 @@ title: Docker
 summary: Docker Compose quickstart
 ---
 
-Run Paperclip in Docker without installing Node or pnpm locally.
+Run Agentik Team in Docker without installing Node or pnpm locally.
 
 ## Compose Quickstart (Recommended)
 
@@ -16,7 +16,7 @@ Open [http://localhost:3100](http://localhost:3100).
 Defaults:
 
 - Host port: `3100`
-- Data directory: `./data/docker-paperclip`
+- Data directory: `./data/docker-agentik-team`
 
 Override with environment variables:
 
@@ -28,18 +28,18 @@ AGENTIK_PORT=3200 AGENTIK_DATA_DIR=./data/pc \
 ## Manual Docker Build
 
 ```sh
-docker build -t paperclip-local .
-docker run --name paperclip \
+docker build -t agentik-team-local .
+docker run --name agentik-team \
   -p 3100:3100 \
   -e HOST=0.0.0.0 \
-  -e AGENTIK_HOME=/paperclip \
-  -v "$(pwd)/data/docker-paperclip:/paperclip" \
-  paperclip-local
+  -e AGENTIK_HOME=/agentik-team \
+  -v "$(pwd)/data/docker-agentik-team:/agentik-team" \
+  agentik-team-local
 ```
 
 ## Data Persistence
 
-All data is persisted under the bind mount (`./data/docker-paperclip`):
+All data is persisted under the bind mount (`./data/docker-agentik-team`):
 
 - Embedded PostgreSQL data
 - Uploaded assets
@@ -56,14 +56,14 @@ The Docker image pre-installs:
 Pass API keys to enable local adapter runs inside the container:
 
 ```sh
-docker run --name paperclip \
+docker run --name agentik-team \
   -p 3100:3100 \
   -e HOST=0.0.0.0 \
-  -e AGENTIK_HOME=/paperclip \
+  -e AGENTIK_HOME=/agentik-team \
   -e OPENAI_API_KEY=sk-... \
   -e ANTHROPIC_API_KEY=sk-... \
-  -v "$(pwd)/data/docker-paperclip:/paperclip" \
-  paperclip-local
+  -v "$(pwd)/data/docker-agentik-team:/agentik-team" \
+  agentik-team-local
 ```
 
 Without API keys, the app runs normally — adapter environment checks will surface missing prerequisites.

@@ -3,7 +3,7 @@ title: Importing & Exporting Companies
 summary: Export companies to portable packages and import them from local paths or GitHub
 ---
 
-Paperclip companies can be exported to portable markdown packages and imported from local directories or GitHub repositories. This lets you share company configurations, duplicate setups, and version-control your agent teams.
+Agentik Team companies can be exported to portable markdown packages and imported from local directories or GitHub repositories. This lets you share company configurations, duplicate setups, and version-control your agent teams.
 
 ## Package Format
 
@@ -21,13 +21,13 @@ my-company/
 │   └── review/SKILL.md
 ├── tasks/
 │   └── onboarding/TASK.md
-└── .paperclip.yaml     # Adapter config, env inputs, routines
+└── .agentik-team.yaml     # Adapter config, env inputs, routines
 ```
 
 - **COMPANY.md** defines company name, description, and metadata.
 - **AGENT.md** files contain agent identity, role, and instructions.
 - **SKILL.md** files are compatible with the Agent Skills ecosystem.
-- **.paperclip.yaml** holds Paperclip-specific config (adapter types, env inputs, budgets) as an optional sidecar.
+- **.agentik-team.yaml** holds Agentik Team-specific config (adapter types, env inputs, budgets) as an optional sidecar.
 
 ## Exporting a Company
 
@@ -69,7 +69,7 @@ agentik-team company export abc123 --out ./skills-only --include skills --skills
 - Project definitions and workspace config
 - Task/issue descriptions (when included)
 - Skill packages (as references or vendored content)
-- Adapter type and env input declarations in `.paperclip.yaml`
+- Adapter type and env input declarations in `.agentik-team.yaml`
 
 Secret values, machine-local paths, and database IDs are **never** exported.
 
@@ -112,7 +112,7 @@ agentik-team company import org/repo/companies/acme
 - **`new`** — Creates a fresh company from the package. Good for duplicating a company template.
 - **`existing`** — Merges the package into an existing company. Use `--company-id` to specify the target.
 
-If `--target` is not specified, Paperclip infers it: if a `--company-id` is provided (or one exists in context), it defaults to `existing`; otherwise `new`.
+If `--target` is not specified, Agentik Team infers it: if a `--company-id` is provided (or one exists in context), it defaults to `existing`; otherwise `new`.
 
 ### Collision Strategies
 
@@ -193,7 +193,7 @@ CEO agents can also use the safe import routes (`/imports/preview` and `/imports
 
 ## GitHub Sources
 
-Paperclip supports several GitHub URL formats:
+Agentik Team supports several GitHub URL formats:
 
 - Full URL: `https://github.com/org/repo`
 - Subfolder URL: `https://github.com/org/repo/tree/main/path/to/company`

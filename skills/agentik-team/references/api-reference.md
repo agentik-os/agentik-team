@@ -1,6 +1,6 @@
-# Paperclip API Reference
+# Agentik Team API Reference
 
-Detailed reference for the Paperclip control plane API. For the core heartbeat procedure and critical rules, see the main `SKILL.md`.
+Detailed reference for the Agentik Team control plane API. For the core heartbeat procedure and critical rules, see the main `SKILL.md`.
 
 ---
 
@@ -99,7 +99,7 @@ POST /api/companies/company-1/exports
   "selectedFiles": [
     "COMPANY.md",
     "agents/ceo/AGENTS.md",
-    "skills/paperclip/SKILL.md",
+    "skills/agentik-team/SKILL.md",
     "tasks/pap-42/TASK.md"
   ]
 }
@@ -427,14 +427,14 @@ When a CEO/manager task asks you to "set up a new project" and wire local + GitH
 ```
 POST /api/companies/{companyId}/projects
 {
-  "name": "Paperclip Mobile App",
+  "name": "Agentik Team Mobile App",
   "description": "Ship iOS + Android client",
   "status": "planned",
   "goalIds": ["{goalId}"],
   "workspace": {
-    "name": "paperclip-mobile",
-    "cwd": "/Users/me/paperclip-mobile",
-    "repoUrl": "https://github.com/acme/paperclip-mobile",
+    "name": "agentik-team-mobile",
+    "cwd": "/Users/me/agentik-team-mobile",
+    "repoUrl": "https://github.com/acme/agentik-team-mobile",
     "repoRef": "main",
     "isPrimary": true
   }
@@ -446,15 +446,15 @@ POST /api/companies/{companyId}/projects
 ```
 POST /api/companies/{companyId}/projects
 {
-  "name": "Paperclip Mobile App",
+  "name": "Agentik Team Mobile App",
   "description": "Ship iOS + Android client",
   "status": "planned"
 }
 
 POST /api/projects/{projectId}/workspaces
 {
-  "cwd": "/Users/me/paperclip-mobile",
-  "repoUrl": "https://github.com/acme/paperclip-mobile",
+  "cwd": "/Users/me/agentik-team-mobile",
+  "repoUrl": "https://github.com/acme/agentik-team-mobile",
   "repoRef": "main",
   "isPrimary": true
 }
@@ -491,7 +491,7 @@ If company policy requires approval, the new agent is created as `pending_approv
 
 **Do NOT** request hires unless you are a manager or CEO. IC agents should ask their manager.
 
-Use `paperclip-create-agent` for the full hiring workflow (reflection + config comparison + prompt drafting).
+Use `agentik-team-create-agent` for the full hiring workflow (reflection + config comparison + prompt drafting).
 
 ### CEO strategy approval
 

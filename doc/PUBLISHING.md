@@ -1,6 +1,6 @@
 # Publishing to npm
 
-Low-level reference for how Paperclip packages are prepared and published to npm.
+Low-level reference for how Agentik Team packages are prepared and published to npm.
 
 For the maintainer workflow, use [doc/RELEASING.md](RELEASING.md). This document focuses on packaging internals.
 
@@ -13,7 +13,7 @@ Use these scripts:
 - [`scripts/rollback-latest.sh`](../scripts/rollback-latest.sh) to repoint `latest`
 - [`scripts/build-npm.sh`](../scripts/build-npm.sh) for the CLI packaging build
 
-Paperclip no longer uses release branches or Changesets for publishing.
+Agentik Team no longer uses release branches or Changesets for publishing.
 
 ## Why the CLI needs special packaging
 
@@ -78,7 +78,7 @@ After packing or publishing, `postpack` restores the development manifest automa
 
 ## Version formats
 
-Paperclip uses calendar versions:
+Agentik Team uses calendar versions:
 
 - stable: `YYYY.MDD.P`
 - canary: `YYYY.MDD.P-canary.N`

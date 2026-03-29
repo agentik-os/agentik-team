@@ -1,9 +1,9 @@
 ---
 title: Local Development
-summary: Set up Paperclip for local development
+summary: Set up Agentik Team for local development
 ---
 
-Run Paperclip locally with zero external dependencies.
+Run Agentik Team locally with zero external dependencies.
 
 ## Prerequisites
 
@@ -22,7 +22,7 @@ This starts:
 - **API server** at `http://localhost:3100`
 - **UI** served by the API server in dev middleware mode (same origin)
 
-No Docker or external database required. Paperclip uses embedded PostgreSQL automatically.
+No Docker or external database required. Agentik Team uses embedded PostgreSQL automatically.
 
 ## One-Command Bootstrap
 
@@ -77,7 +77,7 @@ curl http://localhost:3100/api/companies
 To wipe local data and start fresh:
 
 ```sh
-rm -rf ~/.paperclip/instances/default/db
+rm -rf ~/.agentik-team/instances/default/db
 pnpm dev
 ```
 
@@ -85,11 +85,11 @@ pnpm dev
 
 | Data | Path |
 |------|------|
-| Config | `~/.paperclip/instances/default/config.json` |
-| Database | `~/.paperclip/instances/default/db` |
-| Storage | `~/.paperclip/instances/default/data/storage` |
-| Secrets key | `~/.paperclip/instances/default/secrets/master.key` |
-| Logs | `~/.paperclip/instances/default/logs` |
+| Config | `~/.agentik-team/instances/default/config.json` |
+| Database | `~/.agentik-team/instances/default/db` |
+| Storage | `~/.agentik-team/instances/default/data/storage` |
+| Secrets key | `~/.agentik-team/instances/default/secrets/master.key` |
+| Logs | `~/.agentik-team/instances/default/logs` |
 
 Override with environment variables:
 

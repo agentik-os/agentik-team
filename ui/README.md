@@ -1,6 +1,6 @@
 # @agentik-os/ui
 
-Published static assets for the Paperclip board UI.
+Published static assets for the Agentik Team board UI.
 
 ## What gets published
 

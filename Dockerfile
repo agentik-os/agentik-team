@@ -38,21 +38,21 @@ FROM base AS production
 WORKDIR /app
 COPY --chown=node:node --from=build /app /app
 RUN npm install --global --omit=dev @anthropic-ai/claude-code@latest @openai/codex@latest opencode-ai \
-  && mkdir -p /paperclip \
-  && chown node:node /paperclip
+  && mkdir -p /agentik-team \
+  && chown node:node /agentik-team
 
 ENV NODE_ENV=production \
-  HOME=/paperclip \
+  HOME=/agentik-team \
   HOST=0.0.0.0 \
   PORT=3100 \
   SERVE_UI=true \
-  AGENTIK_HOME=/paperclip \
+  AGENTIK_HOME=/agentik-team \
   AGENTIK_INSTANCE_ID=default \
-  AGENTIK_CONFIG=/paperclip/instances/default/config.json \
+  AGENTIK_CONFIG=/agentik-team/instances/default/config.json \
   AGENTIK_DEPLOYMENT_MODE=authenticated \
   AGENTIK_DEPLOYMENT_EXPOSURE=private
 
-VOLUME ["/paperclip"]
+VOLUME ["/agentik-team"]
 EXPOSE 3100
 
 USER node

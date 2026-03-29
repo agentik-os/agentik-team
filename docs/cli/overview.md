@@ -3,7 +3,7 @@ title: CLI Overview
 summary: CLI installation and setup
 ---
 
-The Paperclip CLI handles instance setup, diagnostics, and control-plane operations.
+The Agentik Team CLI handles instance setup, diagnostics, and control-plane operations.
 
 ## Usage
 
@@ -17,7 +17,7 @@ All commands support:
 
 | Flag | Description |
 |------|-------------|
-| `--data-dir <path>` | Local Paperclip data root (isolates from `~/.paperclip`) |
+| `--data-dir <path>` | Local Agentik Team data root (isolates from `~/.agentik-team`) |
 | `--api-base <url>` | API base URL |
 | `--api-key <token>` | API authentication token |
 | `--context <path>` | Context file path |
@@ -29,7 +29,7 @@ Company-scoped commands also accept `--company-id <id>`.
 For clean local instances, pass `--data-dir` on the command you run:
 
 ```sh
-pnpm agentik-team run --data-dir ./tmp/paperclip-dev
+pnpm agentik-team run --data-dir ./tmp/agentik-team-dev
 ```
 
 ## Context Profiles
@@ -57,7 +57,7 @@ pnpm agentik-team context set --api-key-env-var-name AGENTIK_API_KEY
 export AGENTIK_API_KEY=...
 ```
 
-Context is stored at `~/.paperclip/context.json`.
+Context is stored at `~/.agentik-team/context.json`.
 
 ## Command Categories
 

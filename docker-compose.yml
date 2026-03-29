@@ -2,11 +2,11 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: paperclip
-      POSTGRES_PASSWORD: paperclip
-      POSTGRES_DB: paperclip
+      POSTGRES_USER: agentik
+      POSTGRES_PASSWORD: agentik
+      POSTGRES_DB: agentik
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U paperclip -d paperclip"]
+      test: ["CMD-SHELL", "pg_isready -U agentik -d agentik"]
       interval: 2s
       timeout: 5s
       retries: 30
@@ -20,7 +20,7 @@ services:
     ports:
       - "3100:3100"
     environment:
-      DATABASE_URL: postgres://paperclip:paperclip@db:5432/paperclip
+      DATABASE_URL: postgres://agentik:agentik@db:5432/agentik
       PORT: "3100"
       SERVE_UI: "true"
       AGENTIK_DEPLOYMENT_MODE: "authenticated"
@@ -28,11 +28,11 @@ services:
       AGENTIK_PUBLIC_URL: "${AGENTIK_PUBLIC_URL:-http://localhost:3100}"
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set}"
     volumes:
-      - paperclip-data:/paperclip
+      - agentik-data:/agentik-team
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   pgdata:
-  paperclip-data:
+  agentik-data:

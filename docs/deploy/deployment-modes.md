@@ -3,7 +3,7 @@ title: Deployment Modes
 summary: local_trusted vs authenticated (private/public)
 ---
 
-Paperclip supports two runtime modes with different security profiles.
+Agentik Team supports two runtime modes with different security profiles.
 
 ## `local_trusted`
 
@@ -58,7 +58,7 @@ pnpm agentik-team onboard
 
 ## Board Claim Flow
 
-When migrating from `local_trusted` to `authenticated`, Paperclip emits a one-time claim URL at startup:
+When migrating from `local_trusted` to `authenticated`, Agentik Team emits a one-time claim URL at startup:
 
 ```
 /board-claim/<token>?code=<code>

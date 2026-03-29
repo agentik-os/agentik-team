@@ -3,7 +3,7 @@ title: Environment Variables
 summary: Full environment variable reference
 ---
 
-All environment variables that Paperclip uses for server configuration.
+All environment variables that Agentik Team uses for server configuration.
 
 ## Server Configuration
 
@@ -12,7 +12,7 @@ All environment variables that Paperclip uses for server configuration.
 | `PORT` | `3100` | Server port |
 | `HOST` | `127.0.0.1` | Server host binding |
 | `DATABASE_URL` | (embedded) | PostgreSQL connection string |
-| `AGENTIK_HOME` | `~/.paperclip` | Base directory for all Paperclip data |
+| `AGENTIK_HOME` | `~/.agentik-team` | Base directory for all Agentik Team data |
 | `AGENTIK_INSTANCE_ID` | `default` | Instance identifier (for multiple local instances) |
 | `AGENTIK_DEPLOYMENT_MODE` | `local_trusted` | Runtime mode override |
 
@@ -21,7 +21,7 @@ All environment variables that Paperclip uses for server configuration.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `AGENTIK_SECRETS_MASTER_KEY` | (from file) | 32-byte encryption key (base64/hex/raw) |
-| `AGENTIK_SECRETS_MASTER_KEY_FILE` | `~/.paperclip/.../secrets/master.key` | Path to key file |
+| `AGENTIK_SECRETS_MASTER_KEY_FILE` | `~/.agentik-team/.../secrets/master.key` | Path to key file |
 | `AGENTIK_SECRETS_STRICT_MODE` | `false` | Require secret refs for sensitive env vars |
 
 ## Agent Runtime (Injected into agent processes)
@@ -32,7 +32,7 @@ These are set automatically by the server when invoking agents:
 |----------|-------------|
 | `AGENTIK_AGENT_ID` | Agent's unique ID |
 | `AGENTIK_COMPANY_ID` | Company ID |
-| `AGENTIK_API_URL` | Paperclip API base URL |
+| `AGENTIK_API_URL` | Agentik Team API base URL |
 | `AGENTIK_API_KEY` | Short-lived JWT for API auth |
 | `AGENTIK_RUN_ID` | Current heartbeat run ID |
 | `AGENTIK_TASK_ID` | Issue that triggered this wake |
