@@ -58,3 +58,4 @@ skills/*
 !skills/agentik-create-agent/
 !skills/agentik-create-plugin/
 !skills/para-memory-files/
+.env.local

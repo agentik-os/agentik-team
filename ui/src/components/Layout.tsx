@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, Moon, Settings, Sun } from "lucide-react";
+import { UserButton } from "@clerk/clerk-react";
 import { Link, Outlet, useLocation, useNavigate, useParams } from "@/lib/router";
 import { CompanyRail } from "./CompanyRail";
 import { Sidebar } from "./Sidebar";
@@ -336,6 +337,9 @@ export function Layout() {
                 >
                   {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
+                {import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && (
+                  <UserButton afterSignOutUrl="/auth" appearance={{ elements: { avatarBox: "h-6 w-6" } }} />
+                )}
               </div>
             </div>
           </div>
@@ -394,6 +398,9 @@ export function Layout() {
                 >
                   {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 </Button>
+                {import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && (
+                  <UserButton afterSignOutUrl="/auth" appearance={{ elements: { avatarBox: "h-6 w-6" } }} />
+                )}
               </div>
             </div>
           </div>

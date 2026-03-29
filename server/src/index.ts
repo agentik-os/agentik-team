@@ -460,44 +460,90 @@ export async function startServer(): Promise<StartedServer> {
     await ensureLocalTrustedBoardPrincipal(db as any);
   }
   if (config.deploymentMode === "authenticated") {
-    const {
-      createBetterAuthHandler,
-      createBetterAuthInstance,
-      deriveAuthTrustedOrigins,
-      resolveBetterAuthSession,
-      resolveBetterAuthSessionFromHeaders,
-    } = await import("./auth/better-auth.js");
-    const betterAuthSecret =
-      process.env.BETTER_AUTH_SECRET?.trim() ?? process.env.AGENTIK_AGENT_JWT_SECRET?.trim();
-    if (!betterAuthSecret) {
-      throw new Error(
-        "authenticated mode requires BETTER_AUTH_SECRET (or AGENTIK_AGENT_JWT_SECRET) to be set",
-      );
-    }
-    const derivedTrustedOrigins = deriveAuthTrustedOrigins(config);
-    const envTrustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "")
-      .split(",")
-      .map((value) => value.trim())
-      .filter((value) => value.length > 0);
-    const effectiveTrustedOrigins = Array.from(new Set([...derivedTrustedOrigins, ...envTrustedOrigins]));
-    logger.info(
-      {
-        authBaseUrlMode: config.authBaseUrlMode,
-        authPublicBaseUrl: config.authPublicBaseUrl ?? null,
-        trustedOrigins: effectiveTrustedOrigins,
-        trustedOriginsSource: {
-          derived: derivedTrustedOrigins.length,
-          env: envTrustedOrigins.length,
+    const useClerk = Boolean(process.env.CLERK_SECRET_KEY?.trim());
+
+    if (useClerk) {
+      // Clerk-based authentication
+      const { clerk, verifyClerkSession: verifyClerk } = await import("./auth/clerk.js");
+      if (!clerk) {
+        throw new Error("authenticated mode with Clerk requires CLERK_SECRET_KEY to be set");
+      }
+      logger.info("Using Clerk for authentication");
+      // No betterAuthHandler needed — Clerk handles auth client-side
+      // resolveSession uses Clerk's __session cookie
+      resolveSession = async (req) => {
+        const cookieHeader = req.headers.cookie ?? "";
+        const sessionToken = cookieHeader
+          .split(";")
+          .map((c) => c.trim())
+          .find((c) => c.startsWith("__session="))
+          ?.slice("__session=".length);
+        if (!sessionToken) return null;
+        const result = await verifyClerk(sessionToken);
+        if (!result) return null;
+        return {
+          session: { id: `clerk:${result.userId}`, userId: result.userId },
+          user: { id: result.userId, email: result.email, name: result.name },
+        };
+      };
+      resolveSessionFromHeaders = async (headers) => {
+        const cookieHeader = headers.get("cookie") ?? "";
+        const sessionToken = cookieHeader
+          .split(";")
+          .map((c) => c.trim())
+          .find((c) => c.startsWith("__session="))
+          ?.slice("__session=".length);
+        if (!sessionToken) return null;
+        const result = await verifyClerk(sessionToken);
+        if (!result) return null;
+        return {
+          session: { id: `clerk:${result.userId}`, userId: result.userId },
+          user: { id: result.userId, email: result.email, name: result.name },
+        };
+      };
+      await initializeBoardClaimChallenge(db as any, { deploymentMode: config.deploymentMode });
+      authReady = true;
+    } else {
+      // Legacy better-auth authentication
+      const {
+        createBetterAuthHandler,
+        createBetterAuthInstance,
+        deriveAuthTrustedOrigins,
+        resolveBetterAuthSession,
+        resolveBetterAuthSessionFromHeaders,
+      } = await import("./auth/better-auth.js");
+      const betterAuthSecret =
+        process.env.BETTER_AUTH_SECRET?.trim() ?? process.env.AGENTIK_AGENT_JWT_SECRET?.trim();
+      if (!betterAuthSecret) {
+        throw new Error(
+          "authenticated mode requires BETTER_AUTH_SECRET (or AGENTIK_AGENT_JWT_SECRET) to be set",
+        );
+      }
+      const derivedTrustedOrigins = deriveAuthTrustedOrigins(config);
+      const envTrustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "")
+        .split(",")
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0);
+      const effectiveTrustedOrigins = Array.from(new Set([...derivedTrustedOrigins, ...envTrustedOrigins]));
+      logger.info(
+        {
+          authBaseUrlMode: config.authBaseUrlMode,
+          authPublicBaseUrl: config.authPublicBaseUrl ?? null,
+          trustedOrigins: effectiveTrustedOrigins,
+          trustedOriginsSource: {
+            derived: derivedTrustedOrigins.length,
+            env: envTrustedOrigins.length,
+          },
         },
-      },
-      "Authenticated mode auth origin configuration",
-    );
-    const auth = createBetterAuthInstance(db as any, config, effectiveTrustedOrigins);
-    betterAuthHandler = createBetterAuthHandler(auth);
-    resolveSession = (req) => resolveBetterAuthSession(auth, req);
-    resolveSessionFromHeaders = (headers) => resolveBetterAuthSessionFromHeaders(auth, headers);
-    await initializeBoardClaimChallenge(db as any, { deploymentMode: config.deploymentMode });
-    authReady = true;
+        "Authenticated mode auth origin configuration",
+      );
+      const auth = createBetterAuthInstance(db as any, config, effectiveTrustedOrigins);
+      betterAuthHandler = createBetterAuthHandler(auth);
+      resolveSession = (req) => resolveBetterAuthSession(auth, req);
+      resolveSessionFromHeaders = (headers) => resolveBetterAuthSessionFromHeaders(auth, headers);
+      await initializeBoardClaimChallenge(db as any, { deploymentMode: config.deploymentMode });
+      authReady = true;
+    }
   }
   
   const listenPort = await detectPort(config.port);

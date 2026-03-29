@@ -2,10 +2,11 @@ import { createHash } from "node:crypto";
 import type { Request, RequestHandler } from "express";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Db } from "@agentik-os/db";
-import { agentApiKeys, agents, companyMemberships, instanceUserRoles } from "@agentik-os/db";
+import { agentApiKeys, agents, authUsers, companyMemberships, instanceUserRoles } from "@agentik-os/db";
 import { verifyLocalAgentJwt } from "../agent-auth-jwt.js";
 import type { DeploymentMode } from "@agentik-os/shared";
 import type { BetterAuthSessionResult } from "../auth/better-auth.js";
+import { verifyClerkSession } from "../auth/clerk.js";
 import { logger } from "./logger.js";
 import { boardAuthService } from "../services/board-auth.js";
 
@@ -99,6 +100,57 @@ export function actorMiddleware(db: Db, opts: ActorMiddlewareOptions): RequestHa
         next();
         return;
       }
+    }
+
+    // Try Clerk JWT verification (for human users sending Bearer tokens)
+    const clerkUser = await verifyClerkSession(token);
+    if (clerkUser) {
+      const userId = clerkUser.userId;
+      // Ensure user exists in local DB
+      const existingUser = await db
+        .select({ id: authUsers.id })
+        .from(authUsers)
+        .where(eq(authUsers.id, userId))
+        .then((rows) => rows[0] ?? null);
+      if (!existingUser) {
+        const now = new Date();
+        await db.insert(authUsers).values({
+          id: userId,
+          name: clerkUser.name ?? "Clerk User",
+          email: clerkUser.email ?? `${userId}@clerk.local`,
+          emailVerified: true,
+          image: null,
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+      const [roleRow, memberships] = await Promise.all([
+        db
+          .select({ id: instanceUserRoles.id })
+          .from(instanceUserRoles)
+          .where(and(eq(instanceUserRoles.userId, userId), eq(instanceUserRoles.role, "instance_admin")))
+          .then((rows) => rows[0] ?? null),
+        db
+          .select({ companyId: companyMemberships.companyId })
+          .from(companyMemberships)
+          .where(
+            and(
+              eq(companyMemberships.principalType, "user"),
+              eq(companyMemberships.principalId, userId),
+              eq(companyMemberships.status, "active"),
+            ),
+          ),
+      ]);
+      req.actor = {
+        type: "board",
+        userId,
+        companyIds: memberships.map((row) => row.companyId),
+        isInstanceAdmin: Boolean(roleRow),
+        runId: runIdHeader ?? undefined,
+        source: "clerk_session",
+      };
+      next();
+      return;
     }
 
     const tokenHash = hashToken(token);

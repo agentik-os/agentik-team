@@ -1,15 +1,57 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "@/lib/router";
+import { SignIn, useAuth } from "@clerk/clerk-react";
 import { authApi } from "../api/auth";
 import { queryKeys } from "../lib/queryKeys";
 import { Button } from "@/components/ui/button";
 import { AsciiArtAnimation } from "@/components/AsciiArtAnimation";
 import { Sparkles } from "lucide-react";
 
+const CLERK_ENABLED = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
+
 type AuthMode = "sign_in" | "sign_up";
 
-export function AuthPage() {
+function ClerkAuthPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextPath = useMemo(() => searchParams.get("next") || "/", [searchParams]);
+  const { isSignedIn, isLoaded } = useAuth();
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      navigate(nextPath, { replace: true });
+    }
+  }, [isLoaded, isSignedIn, navigate, nextPath]);
+
+  return (
+    <div className="fixed inset-0 flex bg-background">
+      <div className="w-full md:w-1/2 flex flex-col overflow-y-auto">
+        <div className="w-full max-w-md mx-auto my-auto px-8 py-12">
+          <div className="flex items-center gap-2 mb-8">
+            <Sparkles className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Agentik Team</span>
+          </div>
+          <SignIn
+            routing="hash"
+            forceRedirectUrl={nextPath}
+            appearance={{
+              elements: {
+                rootBox: "w-full",
+                card: "shadow-none border-0 bg-transparent p-0",
+              },
+            }}
+          />
+        </div>
+      </div>
+      <div className="hidden md:block w-1/2 overflow-hidden">
+        <AsciiArtAnimation />
+      </div>
+    </div>
+  );
+}
+
+function LegacyAuthPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -177,4 +219,8 @@ export function AuthPage() {
       </div>
     </div>
   );
+}
+
+export function AuthPage() {
+  return CLERK_ENABLED ? <ClerkAuthPage /> : <LegacyAuthPage />;
 }

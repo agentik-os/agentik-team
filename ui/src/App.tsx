@@ -1,5 +1,6 @@
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from "@/lib/router";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth as useClerkAuthHook } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "./components/Layout";
 import { OnboardingWizard } from "./components/OnboardingWizard";
@@ -42,6 +43,8 @@ import { BoardClaimPage } from "./pages/BoardClaim";
 import { CliAuthPage } from "./pages/CliAuth";
 import { InviteLandingPage } from "./pages/InviteLanding";
 import { NotFoundPage } from "./pages/NotFound";
+import { Pricing } from "./pages/Pricing";
+import { Billing } from "./pages/Billing";
 import { queryKeys } from "./lib/queryKeys";
 import { useCompany } from "./context/CompanyContext";
 import { useDialog } from "./context/DialogContext";
@@ -66,8 +69,26 @@ function BootstrapPendingPage({ hasActiveInvite = false }: { hasActiveInvite?: b
   );
 }
 
+const CLERK_ENABLED = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
+
+/**
+ * Safe wrapper around Clerk's useAuth that works regardless of ClerkProvider presence.
+ * When CLERK_ENABLED is false, ClerkProvider still wraps the tree (as a pass-through in main.tsx),
+ * but we return a stub so Clerk's loading state doesn't gate the UI.
+ */
+function useClerkAuth(): { isLoaded: boolean; isSignedIn: boolean } {
+  // When Clerk is enabled, ClerkProvider is always present, so the hook is safe
+  if (CLERK_ENABLED) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- CLERK_ENABLED is a module-level constant
+    const auth = useClerkAuthHook();
+    return { isLoaded: auth.isLoaded, isSignedIn: auth.isSignedIn ?? false };
+  }
+  return { isLoaded: true, isSignedIn: false };
+}
+
 function CloudAccessGate() {
   const location = useLocation();
+  const clerkAuth = useClerkAuth();
   const healthQuery = useQuery({
     queryKey: queryKeys.health,
     queryFn: () => healthApi.get(),
@@ -84,14 +105,24 @@ function CloudAccessGate() {
   });
 
   const isAuthenticatedMode = healthQuery.data?.deploymentMode === "authenticated";
+
+  // When Clerk is enabled, use Clerk auth state; otherwise fall back to legacy session
   const sessionQuery = useQuery({
     queryKey: queryKeys.auth.session,
     queryFn: () => authApi.getSession(),
-    enabled: isAuthenticatedMode,
+    enabled: isAuthenticatedMode && !CLERK_ENABLED,
     retry: false,
   });
 
-  if (healthQuery.isLoading || (isAuthenticatedMode && sessionQuery.isLoading)) {
+  if (healthQuery.isLoading) {
+    return <div className="mx-auto max-w-xl py-10 text-sm text-muted-foreground">Loading...</div>;
+  }
+
+  if (CLERK_ENABLED && isAuthenticatedMode && !clerkAuth.isLoaded) {
+    return <div className="mx-auto max-w-xl py-10 text-sm text-muted-foreground">Loading...</div>;
+  }
+
+  if (!CLERK_ENABLED && isAuthenticatedMode && sessionQuery.isLoading) {
     return <div className="mx-auto max-w-xl py-10 text-sm text-muted-foreground">Loading...</div>;
   }
 
@@ -107,7 +138,12 @@ function CloudAccessGate() {
     return <BootstrapPendingPage hasActiveInvite={healthQuery.data.bootstrapInviteActive} />;
   }
 
-  if (isAuthenticatedMode && !sessionQuery.data) {
+  if (CLERK_ENABLED && isAuthenticatedMode && !clerkAuth.isSignedIn) {
+    const next = encodeURIComponent(`${location.pathname}${location.search}`);
+    return <Navigate to={`/auth?next=${next}`} replace />;
+  }
+
+  if (!CLERK_ENABLED && isAuthenticatedMode && !sessionQuery.data) {
     const next = encodeURIComponent(`${location.pathname}${location.search}`);
     return <Navigate to={`/auth?next=${next}`} replace />;
   }
@@ -170,6 +206,8 @@ function boardRoutes() {
       <Route path="inbox/unread" element={<Inbox />} />
       <Route path="inbox/all" element={<Inbox />} />
       <Route path="inbox/new" element={<Navigate to="/inbox/mine" replace />} />
+      <Route path="pricing" element={<Pricing />} />
+      <Route path="billing" element={<Billing />} />
       <Route path="design-guide" element={<DesignGuide />} />
       <Route path="tests/ux/runs" element={<RunTranscriptUxLab />} />
       <Route path=":pluginRoutePath" element={<PluginPage />} />
