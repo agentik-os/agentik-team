@@ -3,9 +3,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { logger } from "../middleware/logger.js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2026-03-25.dahlia",
-});
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error("STRIPE_SECRET_KEY is not set — Stripe billing is disabled");
+  return new Stripe(key);
+}
+
+function tryGetStripe(): Stripe | null {
+  try { return getStripe(); } catch { return null; }
+}
 
 const BILLING_DATA_PATH = path.resolve(
   process.env.AGENTIK_DATA_DIR ?? path.join(process.cwd(), ".agentik-team"),
@@ -76,11 +82,11 @@ export function billingService() {
   async function createCustomer(userId: string, email: string): Promise<Stripe.Customer> {
     const existing = getRecord(userId);
     if (existing?.stripeCustomerId) {
-      const customer = await stripe.customers.retrieve(existing.stripeCustomerId);
+      const customer = await getStripe().customers.retrieve(existing.stripeCustomerId);
       if (!customer.deleted) return customer as Stripe.Customer;
     }
 
-    const customer = await stripe.customers.create({
+    const customer = await getStripe().customers.create({
       email,
       metadata: { userId },
     });
@@ -101,7 +107,7 @@ export function billingService() {
     successUrl: string,
     cancelUrl: string,
   ): Promise<Stripe.Checkout.Session> {
-    return stripe.checkout.sessions.create({
+    return getStripe().checkout.sessions.create({
       customer: customerId,
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
@@ -116,14 +122,14 @@ export function billingService() {
     customerId: string,
     returnUrl: string,
   ): Promise<Stripe.BillingPortal.Session> {
-    return stripe.billingPortal.sessions.create({
+    return getStripe().billingPortal.sessions.create({
       customer: customerId,
       return_url: returnUrl,
     });
   }
 
   async function getSubscription(customerId: string): Promise<Stripe.Subscription | null> {
-    const subscriptions = await stripe.subscriptions.list({
+    const subscriptions = await getStripe().subscriptions.list({
       customer: customerId,
       status: "all",
       limit: 1,
@@ -141,13 +147,13 @@ export function billingService() {
 
   async function handleWebhook(payload: Buffer, signature: string): Promise<void> {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";
-    const event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+    const event = getStripe().webhooks.constructEvent(payload, signature, webhookSecret);
 
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.subscription && session.customer) {
-          const sub = await stripe.subscriptions.retrieve(session.subscription as string);
+          const sub = await getStripe().subscriptions.retrieve(session.subscription as string);
           const priceId = sub.items.data[0]?.price?.id ?? "";
           const customerId = typeof session.customer === "string" ? session.customer : session.customer.id;
 
