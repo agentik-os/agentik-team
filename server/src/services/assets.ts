@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import type { Db } from "@paperclipai/db";
-import { assets } from "@paperclipai/db";
+import type { Db } from "@agentik-os/db";
+import { assets } from "@agentik-os/db";
 
 export function assetService(db: Db) {
   return {

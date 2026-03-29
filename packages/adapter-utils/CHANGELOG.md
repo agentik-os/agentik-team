@@ -1,4 +1,4 @@
-# @paperclipai/adapter-utils
+# @agentik-os/adapter-utils
 
 ## 0.3.1
 

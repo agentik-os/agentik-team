@@ -30,7 +30,7 @@ packages/adapters/<name>/
       build-config.ts   # CreateConfigValues -> adapterConfig JSON for agent creation form
     cli/
       index.ts          # CLI exports: formatStdoutEvent
-      format-event.ts   # Colored terminal output for `paperclipai run --watch`
+      format-event.ts   # Colored terminal output for `agentik-team run --watch`
   package.json
   tsconfig.json
 ```
@@ -45,9 +45,9 @@ Three separate registries consume adapter modules:
 
 ---
 
-## 2. Shared Types (`@paperclipai/adapter-utils`)
+## 2. Shared Types (`@agentik-os/adapter-utils`)
 
-All adapter interfaces live in `packages/adapter-utils/src/types.ts`. Import from `@paperclipai/adapter-utils` (types) or `@paperclipai/adapter-utils/server-utils` (runtime helpers).
+All adapter interfaces live in `packages/adapter-utils/src/types.ts`. Import from `@agentik-os/adapter-utils` (types) or `@agentik-os/adapter-utils/server-utils` (runtime helpers).
 
 ### Core Interfaces
 
@@ -186,7 +186,7 @@ packages/adapters/<name>/
 
 ```json
 {
-  "name": "@paperclipai/adapter-<name>",
+  "name": "@agentik-os/adapter-<name>",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -197,7 +197,7 @@ packages/adapters/<name>/
     "./cli": "./src/cli/index.ts"
   },
   "dependencies": {
-    "@paperclipai/adapter-utils": "workspace:*",
+    "@agentik-os/adapter-utils": "workspace:*",
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
@@ -265,8 +265,8 @@ This is the most important file. It receives an `AdapterExecutionContext` and mu
 
 **Required behavior:**
 
-1. **Read config** — extract typed values from `ctx.config` using helpers (`asString`, `asNumber`, `asBoolean`, `asStringArray`, `parseObject` from `@paperclipai/adapter-utils/server-utils`)
-2. **Build environment** — call `buildPaperclipEnv(agent)` then layer in `PAPERCLIP_RUN_ID`, context vars (`PAPERCLIP_TASK_ID`, `PAPERCLIP_WAKE_REASON`, `PAPERCLIP_WAKE_COMMENT_ID`, `PAPERCLIP_APPROVAL_ID`, `PAPERCLIP_APPROVAL_STATUS`, `PAPERCLIP_LINKED_ISSUE_IDS`), user env overrides, and auth token
+1. **Read config** — extract typed values from `ctx.config` using helpers (`asString`, `asNumber`, `asBoolean`, `asStringArray`, `parseObject` from `@agentik-os/adapter-utils/server-utils`)
+2. **Build environment** — call `buildPaperclipEnv(agent)` then layer in `AGENTIK_RUN_ID`, context vars (`AGENTIK_TASK_ID`, `AGENTIK_WAKE_REASON`, `AGENTIK_WAKE_COMMENT_ID`, `AGENTIK_APPROVAL_ID`, `AGENTIK_APPROVAL_STATUS`, `AGENTIK_LINKED_ISSUE_IDS`), user env overrides, and auth token
 3. **Resolve session** — check `runtime.sessionParams` / `runtime.sessionId` for an existing session; validate it's compatible (e.g. same cwd); decide whether to resume or start fresh
 4. **Render prompt** — use `renderTemplate(template, data)` with the template variables: `agentId`, `companyId`, `runId`, `company`, `agent`, `run`, `context`
 5. **Call onMeta** — emit adapter invocation metadata before spawning the process
@@ -279,17 +279,17 @@ This is the most important file. It receives an `AdapterExecutionContext` and mu
 
 | Variable | Source |
 |----------|--------|
-| `PAPERCLIP_AGENT_ID` | `agent.id` |
-| `PAPERCLIP_COMPANY_ID` | `agent.companyId` |
-| `PAPERCLIP_API_URL` | Server's own URL |
-| `PAPERCLIP_RUN_ID` | Current run id |
-| `PAPERCLIP_TASK_ID` | `context.taskId` or `context.issueId` |
-| `PAPERCLIP_WAKE_REASON` | `context.wakeReason` |
-| `PAPERCLIP_WAKE_COMMENT_ID` | `context.wakeCommentId` or `context.commentId` |
-| `PAPERCLIP_APPROVAL_ID` | `context.approvalId` |
-| `PAPERCLIP_APPROVAL_STATUS` | `context.approvalStatus` |
-| `PAPERCLIP_LINKED_ISSUE_IDS` | `context.issueIds` (comma-separated) |
-| `PAPERCLIP_API_KEY` | `authToken` (if no explicit key in config) |
+| `AGENTIK_AGENT_ID` | `agent.id` |
+| `AGENTIK_COMPANY_ID` | `agent.companyId` |
+| `AGENTIK_API_URL` | Server's own URL |
+| `AGENTIK_RUN_ID` | Current run id |
+| `AGENTIK_TASK_ID` | `context.taskId` or `context.issueId` |
+| `AGENTIK_WAKE_REASON` | `context.wakeReason` |
+| `AGENTIK_WAKE_COMMENT_ID` | `context.wakeCommentId` or `context.commentId` |
+| `AGENTIK_APPROVAL_ID` | `context.approvalId` |
+| `AGENTIK_APPROVAL_STATUS` | `context.approvalStatus` |
+| `AGENTIK_LINKED_ISSUE_IDS` | `context.issueIds` (comma-separated) |
+| `AGENTIK_API_KEY` | `authToken` (if no explicit key in config) |
 
 #### `server/parse.ts` — Output Parser
 
@@ -395,7 +395,7 @@ The component must support both `create` mode (using `values`/`set`) and `edit` 
 
 #### `cli/format-event.ts` — Terminal Formatter
 
-Pretty-prints stdout lines for `paperclipai run --watch`. Use `picocolors` for coloring.
+Pretty-prints stdout lines for `agentik-team run --watch`. Use `picocolors` for coloring.
 
 ```ts
 import pc from "picocolors";
@@ -416,8 +416,8 @@ After creating the adapter package, register it in all three consumers:
 ### 4.1 Server Registry (`server/src/adapters/registry.ts`)
 
 ```ts
-import { execute as myExecute, sessionCodec as mySessionCodec } from "@paperclipai/adapter-my-agent/server";
-import { agentConfigurationDoc as myDoc, models as myModels } from "@paperclipai/adapter-my-agent";
+import { execute as myExecute, sessionCodec as mySessionCodec } from "@agentik-os/adapter-my-agent/server";
+import { agentConfigurationDoc as myDoc, models as myModels } from "@agentik-os/adapter-my-agent";
 
 const myAgentAdapter: ServerAdapterModule = {
   type: "my_agent",
@@ -448,9 +448,9 @@ With `ui/src/adapters/my-agent/index.ts`:
 
 ```ts
 import type { UIAdapterModule } from "../types";
-import { parseMyAgentStdoutLine } from "@paperclipai/adapter-my-agent/ui";
+import { parseMyAgentStdoutLine } from "@agentik-os/adapter-my-agent/ui";
 import { MyAgentConfigFields } from "./config-fields";
-import { buildMyAgentConfig } from "@paperclipai/adapter-my-agent/ui";
+import { buildMyAgentConfig } from "@agentik-os/adapter-my-agent/ui";
 
 export const myAgentUIAdapter: UIAdapterModule = {
   type: "my_agent",
@@ -464,7 +464,7 @@ export const myAgentUIAdapter: UIAdapterModule = {
 ### 4.3 CLI Registry (`cli/src/adapters/registry.ts`)
 
 ```ts
-import { printMyAgentStreamEvent } from "@paperclipai/adapter-my-agent/cli";
+import { printMyAgentStreamEvent } from "@agentik-os/adapter-my-agent/cli";
 
 const myAgentCLIAdapter: CLIAdapterModule = {
   type: "my_agent",
@@ -513,7 +513,7 @@ if (sessionId && !proc.timedOut && exitCode !== 0 && isUnknownSessionError(outpu
 
 ## 6. Server-Utils Helpers
 
-Import from `@paperclipai/adapter-utils/server-utils`:
+Import from `@agentik-os/adapter-utils/server-utils`:
 
 | Helper | Purpose |
 |--------|---------|
@@ -524,7 +524,7 @@ Import from `@paperclipai/adapter-utils/server-utils`:
 | `parseObject(val)` | Safe `Record<string, unknown>` extraction |
 | `parseJson(str)` | Safe JSON.parse returning `Record` or null |
 | `renderTemplate(tmpl, data)` | `{{path.to.value}}` template rendering |
-| `buildPaperclipEnv(agent)` | Standard `PAPERCLIP_*` env vars |
+| `buildPaperclipEnv(agent)` | Standard `AGENTIK_*` env vars |
 | `redactEnvForLogs(env)` | Redact sensitive keys for onMeta |
 | `ensureAbsoluteDirectory(cwd)` | Validate cwd exists and is absolute |
 | `ensureCommandResolvable(cmd, cwd, env)` | Validate command is in PATH |
@@ -537,7 +537,7 @@ Import from `@paperclipai/adapter-utils/server-utils`:
 
 ### Naming
 - Adapter type: `snake_case` (e.g. `claude_local`, `codex_local`)
-- Package name: `@paperclipai/adapter-<kebab-name>`
+- Package name: `@agentik-os/adapter-<kebab-name>`
 - Package directory: `packages/adapters/<kebab-name>/`
 
 ### Config Parsing
@@ -583,11 +583,11 @@ async function buildSkillsDir(): Promise<string> {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-skills-"));
   const target = path.join(tmp, ".claude", "skills");
   await fs.mkdir(target, { recursive: true });
-  const entries = await fs.readdir(PAPERCLIP_SKILLS_DIR, { withFileTypes: true });
+  const entries = await fs.readdir(AGENTIK_SKILLS_DIR, { withFileTypes: true });
   for (const entry of entries) {
     if (entry.isDirectory()) {
       await fs.symlink(
-        path.join(PAPERCLIP_SKILLS_DIR, entry.name),
+        path.join(AGENTIK_SKILLS_DIR, entry.name),
         path.join(target, entry.name),
       );
     }
@@ -645,7 +645,7 @@ The agent process runs LLM-driven code that reads external files, fetches URLs, 
 
 Never put secrets (API keys, tokens) into prompt templates or config fields that flow through the LLM. Instead, inject them as environment variables that the agent's tools can read directly:
 
-- `PAPERCLIP_API_KEY` is injected by the server into the process environment, not the prompt
+- `AGENTIK_API_KEY` is injected by the server into the process environment, not the prompt
 - User-provided secrets in `config.env` are passed as env vars, redacted in `onMeta` logs
 - The `redactEnvForLogs()` helper automatically masks any key matching `/(key|token|secret|password|authorization|cookie)/i`
 

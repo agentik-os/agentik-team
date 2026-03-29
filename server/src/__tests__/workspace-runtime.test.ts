@@ -15,7 +15,7 @@ import {
   type RealizedExecutionWorkspace,
 } from "../services/workspace-runtime.ts";
 import { resolvePaperclipConfigPath } from "../paths.ts";
-import type { WorkspaceOperation } from "@paperclipai/shared";
+import type { WorkspaceOperation } from "@agentik-os/shared";
 import type { WorkspaceOperationRecorder } from "../services/workspace-operations.ts";
 
 const execFileAsync = promisify(execFile);
@@ -123,10 +123,10 @@ afterEach(async () => {
       leasedRunIds.delete(runId);
     }),
   );
-  delete process.env.PAPERCLIP_CONFIG;
-  delete process.env.PAPERCLIP_HOME;
-  delete process.env.PAPERCLIP_INSTANCE_ID;
-  delete process.env.PAPERCLIP_WORKTREES_DIR;
+  delete process.env.AGENTIK_CONFIG;
+  delete process.env.AGENTIK_HOME;
+  delete process.env.AGENTIK_INSTANCE_ID;
+  delete process.env.AGENTIK_WORKTREES_DIR;
   delete process.env.DATABASE_URL;
 });
 
@@ -207,9 +207,9 @@ describe("realizeExecutionWorkspace", () => {
       [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
-        "printf '%s\\n' \"$PAPERCLIP_WORKSPACE_BRANCH\" > .paperclip-provision-branch",
-        "printf '%s\\n' \"$PAPERCLIP_WORKSPACE_BASE_CWD\" > .paperclip-provision-base",
-        "printf '%s\\n' \"$PAPERCLIP_WORKSPACE_CREATED\" > .paperclip-provision-created",
+        "printf '%s\\n' \"$AGENTIK_WORKSPACE_BRANCH\" > .paperclip-provision-branch",
+        "printf '%s\\n' \"$AGENTIK_WORKSPACE_BASE_CWD\" > .paperclip-provision-base",
+        "printf '%s\\n' \"$AGENTIK_WORKSPACE_CREATED\" > .paperclip-provision-created",
       ].join("\n"),
       "utf8",
     );
@@ -295,9 +295,9 @@ describe("realizeExecutionWorkspace", () => {
     const sharedConfigPath = path.join(sharedConfigDir, "config.json");
     const sharedEnvPath = path.join(sharedConfigDir, ".env");
 
-    process.env.PAPERCLIP_HOME = paperclipHome;
-    process.env.PAPERCLIP_INSTANCE_ID = instanceId;
-    process.env.PAPERCLIP_WORKTREES_DIR = isolatedWorktreeHome;
+    process.env.AGENTIK_HOME = paperclipHome;
+    process.env.AGENTIK_INSTANCE_ID = instanceId;
+    process.env.AGENTIK_WORKTREES_DIR = isolatedWorktreeHome;
 
     await fs.mkdir(sharedConfigDir, { recursive: true });
     await fs.writeFile(
@@ -420,12 +420,12 @@ describe("realizeExecutionWorkspace", () => {
         path.join(expectedInstanceRoot, "secrets", "master.key"),
       );
       expect(envContents).not.toContain("DATABASE_URL=");
-      expect(envContents).toContain(`PAPERCLIP_HOME=${JSON.stringify(isolatedWorktreeHome)}`);
-      expect(envContents).toContain(`PAPERCLIP_INSTANCE_ID=${JSON.stringify(expectedInstanceId)}`);
-      expect(envContents).toContain(`PAPERCLIP_CONFIG=${JSON.stringify(configPath)}`);
-      expect(envContents).toContain("PAPERCLIP_IN_WORKTREE=true");
+      expect(envContents).toContain(`AGENTIK_HOME=${JSON.stringify(isolatedWorktreeHome)}`);
+      expect(envContents).toContain(`AGENTIK_INSTANCE_ID=${JSON.stringify(expectedInstanceId)}`);
+      expect(envContents).toContain(`AGENTIK_CONFIG=${JSON.stringify(configPath)}`);
+      expect(envContents).toContain("AGENTIK_IN_WORKTREE=true");
       expect(envContents).toContain(
-        `PAPERCLIP_WORKTREE_NAME=${JSON.stringify("PAP-885-show-worktree-banner")}`,
+        `AGENTIK_WORKTREE_NAME=${JSON.stringify("PAP-885-show-worktree-banner")}`,
       );
 
       process.chdir(workspace.cwd);
@@ -844,9 +844,9 @@ describe("ensureRuntimeServicesForRun", () => {
         [
           "const fs = require('node:fs');",
           `fs.writeFileSync(${JSON.stringify(envCapturePath)}, JSON.stringify({`,
-          "paperclipConfig: process.env.PAPERCLIP_CONFIG ?? null,",
-          "paperclipHome: process.env.PAPERCLIP_HOME ?? null,",
-          "paperclipInstanceId: process.env.PAPERCLIP_INSTANCE_ID ?? null,",
+          "paperclipConfig: process.env.AGENTIK_CONFIG ?? null,",
+          "paperclipHome: process.env.AGENTIK_HOME ?? null,",
+          "paperclipInstanceId: process.env.AGENTIK_INSTANCE_ID ?? null,",
           "databaseUrl: process.env.DATABASE_URL ?? null,",
           "customEnv: process.env.RUNTIME_CUSTOM_ENV ?? null,",
           "port: process.env.PORT ?? null,",
@@ -856,9 +856,9 @@ describe("ensureRuntimeServicesForRun", () => {
       ),
     ].join(" ");
 
-    process.env.PAPERCLIP_CONFIG = "/tmp/base-paperclip-config.json";
-    process.env.PAPERCLIP_HOME = "/tmp/base-paperclip-home";
-    process.env.PAPERCLIP_INSTANCE_ID = "base-instance";
+    process.env.AGENTIK_CONFIG = "/tmp/base-paperclip-config.json";
+    process.env.AGENTIK_HOME = "/tmp/base-paperclip-home";
+    process.env.AGENTIK_INSTANCE_ID = "base-instance";
     process.env.DATABASE_URL = "postgres://shared-db.example.com/paperclip";
 
     const runId = "run-env";

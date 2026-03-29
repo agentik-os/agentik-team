@@ -8,7 +8,7 @@ import {
   issueComments,
   issueInboxArchives,
   issues,
-} from "@paperclipai/db";
+} from "@agentik-os/db";
 import {
   getEmbeddedPostgresTestSupport,
   startEmbeddedPostgresTestDatabase,

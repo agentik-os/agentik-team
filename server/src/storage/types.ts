@@ -1,4 +1,4 @@
-import type { StorageProvider as StorageProviderId } from "@paperclipai/shared";
+import type { StorageProvider as StorageProviderId } from "@agentik-os/shared";
 import type { Readable } from "node:stream";
 
 export interface PutObjectInput {

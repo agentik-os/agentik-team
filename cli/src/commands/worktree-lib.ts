@@ -252,13 +252,13 @@ export function buildWorktreeEnvEntries(
   branding?: WorktreeUiBranding,
 ): Record<string, string> {
   return {
-    PAPERCLIP_HOME: paths.homeDir,
-    PAPERCLIP_INSTANCE_ID: paths.instanceId,
-    PAPERCLIP_CONFIG: paths.configPath,
-    PAPERCLIP_CONTEXT: paths.contextPath,
-    PAPERCLIP_IN_WORKTREE: "true",
-    ...(branding?.name ? { PAPERCLIP_WORKTREE_NAME: branding.name } : {}),
-    ...(branding?.color ? { PAPERCLIP_WORKTREE_COLOR: branding.color } : {}),
+    AGENTIK_HOME: paths.homeDir,
+    AGENTIK_INSTANCE_ID: paths.instanceId,
+    AGENTIK_CONFIG: paths.configPath,
+    AGENTIK_CONTEXT: paths.contextPath,
+    AGENTIK_IN_WORKTREE: "true",
+    ...(branding?.name ? { AGENTIK_WORKTREE_NAME: branding.name } : {}),
+    ...(branding?.color ? { AGENTIK_WORKTREE_COLOR: branding.color } : {}),
   };
 }
 

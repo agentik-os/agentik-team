@@ -29,9 +29,9 @@ FROM base AS build
 WORKDIR /app
 COPY --from=deps /app /app
 COPY . .
-RUN pnpm --filter @paperclipai/ui build
-RUN pnpm --filter @paperclipai/plugin-sdk build
-RUN pnpm --filter @paperclipai/server build
+RUN pnpm --filter @agentik-os/ui build
+RUN pnpm --filter @agentik-os/plugin-sdk build
+RUN pnpm --filter @agentik-os/server build
 RUN test -f server/dist/index.js || (echo "ERROR: server build output missing" && exit 1)
 
 FROM base AS production
@@ -46,11 +46,11 @@ ENV NODE_ENV=production \
   HOST=0.0.0.0 \
   PORT=3100 \
   SERVE_UI=true \
-  PAPERCLIP_HOME=/paperclip \
-  PAPERCLIP_INSTANCE_ID=default \
-  PAPERCLIP_CONFIG=/paperclip/instances/default/config.json \
-  PAPERCLIP_DEPLOYMENT_MODE=authenticated \
-  PAPERCLIP_DEPLOYMENT_EXPOSURE=private
+  AGENTIK_HOME=/paperclip \
+  AGENTIK_INSTANCE_ID=default \
+  AGENTIK_CONFIG=/paperclip/instances/default/config.json \
+  AGENTIK_DEPLOYMENT_MODE=authenticated \
+  AGENTIK_DEPLOYMENT_EXPOSURE=private
 
 VOLUME ["/paperclip"]
 EXPOSE 3100

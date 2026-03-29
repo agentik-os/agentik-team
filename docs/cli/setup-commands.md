@@ -5,32 +5,32 @@ summary: Onboard, run, doctor, and configure
 
 Instance setup and diagnostics commands.
 
-## `paperclipai run`
+## `agentik-team run`
 
 One-command bootstrap and start:
 
 ```sh
-pnpm paperclipai run
+pnpm agentik-team run
 ```
 
 Does:
 
 1. Auto-onboards if config is missing
-2. Runs `paperclipai doctor` with repair enabled
+2. Runs `agentik-team doctor` with repair enabled
 3. Starts the server when checks pass
 
 Choose a specific instance:
 
 ```sh
-pnpm paperclipai run --instance dev
+pnpm agentik-team run --instance dev
 ```
 
-## `paperclipai onboard`
+## `agentik-team onboard`
 
 Interactive first-time setup:
 
 ```sh
-pnpm paperclipai onboard
+pnpm agentik-team onboard
 ```
 
 First prompt:
@@ -41,22 +41,22 @@ First prompt:
 Start immediately after onboarding:
 
 ```sh
-pnpm paperclipai onboard --run
+pnpm agentik-team onboard --run
 ```
 
 Non-interactive defaults + immediate start (opens browser on server listen):
 
 ```sh
-pnpm paperclipai onboard --yes
+pnpm agentik-team onboard --yes
 ```
 
-## `paperclipai doctor`
+## `agentik-team doctor`
 
 Health checks with optional auto-repair:
 
 ```sh
-pnpm paperclipai doctor
-pnpm paperclipai doctor --repair
+pnpm agentik-team doctor
+pnpm agentik-team doctor --repair
 ```
 
 Validates:
@@ -67,30 +67,30 @@ Validates:
 - Storage configuration
 - Missing key files
 
-## `paperclipai configure`
+## `agentik-team configure`
 
 Update configuration sections:
 
 ```sh
-pnpm paperclipai configure --section server
-pnpm paperclipai configure --section secrets
-pnpm paperclipai configure --section storage
+pnpm agentik-team configure --section server
+pnpm agentik-team configure --section secrets
+pnpm agentik-team configure --section storage
 ```
 
-## `paperclipai env`
+## `agentik-team env`
 
 Show resolved environment configuration:
 
 ```sh
-pnpm paperclipai env
+pnpm agentik-team env
 ```
 
-## `paperclipai allowed-hostname`
+## `agentik-team allowed-hostname`
 
 Allow a private hostname for authenticated/private mode:
 
 ```sh
-pnpm paperclipai allowed-hostname my-tailscale-host
+pnpm agentik-team allowed-hostname my-tailscale-host
 ```
 
 ## Local Storage Paths
@@ -106,12 +106,12 @@ pnpm paperclipai allowed-hostname my-tailscale-host
 Override with:
 
 ```sh
-PAPERCLIP_HOME=/custom/home PAPERCLIP_INSTANCE_ID=dev pnpm paperclipai run
+AGENTIK_HOME=/custom/home AGENTIK_INSTANCE_ID=dev pnpm agentik-team run
 ```
 
 Or pass `--data-dir` directly on any command:
 
 ```sh
-pnpm paperclipai run --data-dir ./tmp/paperclip-dev
-pnpm paperclipai doctor --data-dir ./tmp/paperclip-dev
+pnpm agentik-team run --data-dir ./tmp/paperclip-dev
+pnpm agentik-team doctor --data-dir ./tmp/paperclip-dev
 ```

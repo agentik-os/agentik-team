@@ -1,8 +1,8 @@
 import { and, desc, eq } from "drizzle-orm";
-import type { Db } from "@paperclipai/db";
-import { companySecrets, companySecretVersions } from "@paperclipai/db";
-import type { AgentEnvConfig, EnvBinding, SecretProvider } from "@paperclipai/shared";
-import { envBindingSchema } from "@paperclipai/shared";
+import type { Db } from "@agentik-os/db";
+import { companySecrets, companySecretVersions } from "@agentik-os/db";
+import type { AgentEnvConfig, EnvBinding, SecretProvider } from "@agentik-os/shared";
+import { envBindingSchema } from "@agentik-os/shared";
 import { conflict, notFound, unprocessable } from "../errors.js";
 import { getSecretProvider, listSecretProviders } from "../secrets/provider-registry.js";
 

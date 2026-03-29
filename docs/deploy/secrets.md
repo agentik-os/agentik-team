@@ -22,35 +22,35 @@ This key is auto-created during onboarding. The key never leaves your machine.
 Onboarding writes default secrets config:
 
 ```sh
-pnpm paperclipai onboard
+pnpm agentik-team onboard
 ```
 
 Update secrets settings:
 
 ```sh
-pnpm paperclipai configure --section secrets
+pnpm agentik-team configure --section secrets
 ```
 
 Validate secrets config:
 
 ```sh
-pnpm paperclipai doctor
+pnpm agentik-team doctor
 ```
 
 ### Environment Overrides
 
 | Variable | Description |
 |----------|-------------|
-| `PAPERCLIP_SECRETS_MASTER_KEY` | 32-byte key as base64, hex, or raw string |
-| `PAPERCLIP_SECRETS_MASTER_KEY_FILE` | Custom key file path |
-| `PAPERCLIP_SECRETS_STRICT_MODE` | Set to `true` to enforce secret refs |
+| `AGENTIK_SECRETS_MASTER_KEY` | 32-byte key as base64, hex, or raw string |
+| `AGENTIK_SECRETS_MASTER_KEY_FILE` | Custom key file path |
+| `AGENTIK_SECRETS_STRICT_MODE` | Set to `true` to enforce secret refs |
 
 ## Strict Mode
 
 When strict mode is enabled, sensitive env keys (matching `*_API_KEY`, `*_TOKEN`, `*_SECRET`) must use secret references instead of inline plain values.
 
 ```sh
-PAPERCLIP_SECRETS_STRICT_MODE=true
+AGENTIK_SECRETS_STRICT_MODE=true
 ```
 
 Recommended for any deployment beyond local trusted.

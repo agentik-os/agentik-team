@@ -1,4 +1,4 @@
-import type { CompanySecret, SecretProviderDescriptor, SecretProvider } from "@paperclipai/shared";
+import type { CompanySecret, SecretProviderDescriptor, SecretProvider } from "@agentik-os/shared";
 import { api } from "./client";
 
 export const secretsApi = {

@@ -13,9 +13,9 @@ pnpm dev --tailscale-auth
 
 This configures:
 
-- `PAPERCLIP_DEPLOYMENT_MODE=authenticated`
-- `PAPERCLIP_DEPLOYMENT_EXPOSURE=private`
-- `PAPERCLIP_AUTH_BASE_URL_MODE=auto`
+- `AGENTIK_DEPLOYMENT_MODE=authenticated`
+- `AGENTIK_DEPLOYMENT_EXPOSURE=private`
+- `AGENTIK_AUTH_BASE_URL_MODE=auto`
 - `HOST=0.0.0.0` (bind on all interfaces)
 
 Equivalent flag:
@@ -53,7 +53,7 @@ http://my-macbook.tailnet.ts.net:3100
 If you access Paperclip with a custom private hostname, add it to the allowlist:
 
 ```sh
-pnpm paperclipai allowed-hostname my-macbook.tailnet.ts.net
+pnpm agentik-team allowed-hostname my-macbook.tailnet.ts.net
 ```
 
 ## 5. Verify the server is reachable
@@ -72,6 +72,6 @@ Expected result:
 
 ## Troubleshooting
 
-- Login or redirect errors on a private hostname: add it with `paperclipai allowed-hostname`.
+- Login or redirect errors on a private hostname: add it with `agentik-team allowed-hostname`.
 - App only works on `localhost`: make sure you started with `--tailscale-auth` (or set `HOST=0.0.0.0` in private mode).
 - Can connect locally but not remotely: verify both devices are on the same Tailscale network and port `3100` is reachable.

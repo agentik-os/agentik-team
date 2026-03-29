@@ -1,5 +1,5 @@
-import type { Agent, CompanyPortabilitySidebarOrder, Project } from "@paperclipai/shared";
-import { deriveProjectUrlKey, normalizeAgentUrlKey } from "@paperclipai/shared";
+import type { Agent, CompanyPortabilitySidebarOrder, Project } from "@agentik-os/shared";
+import { deriveProjectUrlKey, normalizeAgentUrlKey } from "@agentik-os/shared";
 
 function uniqueSlug(base: string, used: Set<string>) {
   if (!used.has(base)) {

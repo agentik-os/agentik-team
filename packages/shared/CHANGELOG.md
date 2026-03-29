@@ -1,4 +1,4 @@
-# @paperclipai/shared
+# @agentik-os/shared
 
 ## 0.3.1
 

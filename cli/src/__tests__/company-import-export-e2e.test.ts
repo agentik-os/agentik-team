@@ -107,7 +107,7 @@ function writeTestConfig(configPath: string, tempRoot: string, port: number, con
 function createServerEnv(configPath: string, port: number, connectionString: string) {
   const env = { ...process.env };
   for (const key of Object.keys(env)) {
-    if (key.startsWith("PAPERCLIP_")) {
+    if (key.startsWith("AGENTIK_")) {
       delete env[key];
     }
   }
@@ -117,15 +117,15 @@ function createServerEnv(configPath: string, port: number, connectionString: str
   delete env.SERVE_UI;
   delete env.HEARTBEAT_SCHEDULER_ENABLED;
 
-  env.PAPERCLIP_CONFIG = configPath;
+  env.AGENTIK_CONFIG = configPath;
   env.DATABASE_URL = connectionString;
   env.HOST = "127.0.0.1";
   env.PORT = String(port);
   env.SERVE_UI = "false";
-  env.PAPERCLIP_DB_BACKUP_ENABLED = "false";
+  env.AGENTIK_DB_BACKUP_ENABLED = "false";
   env.HEARTBEAT_SCHEDULER_ENABLED = "false";
-  env.PAPERCLIP_MIGRATION_AUTO_APPLY = "true";
-  env.PAPERCLIP_UI_DEV_MIDDLEWARE = "false";
+  env.AGENTIK_MIGRATION_AUTO_APPLY = "true";
+  env.AGENTIK_UI_DEV_MIDDLEWARE = "false";
 
   return env;
 }
@@ -133,7 +133,7 @@ function createServerEnv(configPath: string, port: number, connectionString: str
 function createCliEnv() {
   const env = { ...process.env };
   for (const key of Object.keys(env)) {
-    if (key.startsWith("PAPERCLIP_")) {
+    if (key.startsWith("AGENTIK_")) {
       delete env[key];
     }
   }
@@ -141,10 +141,10 @@ function createCliEnv() {
   delete env.PORT;
   delete env.HOST;
   delete env.SERVE_UI;
-  delete env.PAPERCLIP_DB_BACKUP_ENABLED;
+  delete env.AGENTIK_DB_BACKUP_ENABLED;
   delete env.HEARTBEAT_SCHEDULER_ENABLED;
-  delete env.PAPERCLIP_MIGRATION_AUTO_APPLY;
-  delete env.PAPERCLIP_UI_DEV_MIDDLEWARE;
+  delete env.AGENTIK_MIGRATION_AUTO_APPLY;
+  delete env.AGENTIK_UI_DEV_MIDDLEWARE;
   return env;
 }
 
@@ -187,7 +187,7 @@ async function runCliJson<T>(args: string[], opts: { apiBase: string; configPath
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
   const result = await execFileAsync(
     "pnpm",
-    ["--silent", "paperclipai", ...args, "--api-base", opts.apiBase, "--config", opts.configPath, "--json"],
+    ["--silent", "agentik-team", ...args, "--api-base", opts.apiBase, "--config", opts.configPath, "--json"],
     {
       cwd: repoRoot,
       env: createCliEnv(),
@@ -211,7 +211,7 @@ async function waitForServer(
   while (Date.now() - startedAt < 30_000) {
     if (child.exitCode !== null) {
       throw new Error(
-        `paperclipai run exited before healthcheck succeeded.\nstdout:\n${output.stdout.join("")}\nstderr:\n${output.stderr.join("")}`,
+        `agentik-team run exited before healthcheck succeeded.\nstdout:\n${output.stdout.join("")}\nstderr:\n${output.stderr.join("")}`,
       );
     }
 
@@ -230,7 +230,7 @@ async function waitForServer(
   );
 }
 
-describeEmbeddedPostgres("paperclipai company import/export e2e", () => {
+describeEmbeddedPostgres("agentik-team company import/export e2e", () => {
   let tempRoot = "";
   let configPath = "";
   let exportDir = "";
@@ -253,7 +253,7 @@ describeEmbeddedPostgres("paperclipai company import/export e2e", () => {
     const output = { stdout: [] as string[], stderr: [] as string[] };
     const child = spawn(
       "pnpm",
-      ["paperclipai", "run", "--config", configPath],
+      ["agentik-team", "run", "--config", configPath],
       {
         cwd: repoRoot,
         env: createServerEnv(configPath, port, tempDb.connectionString),
