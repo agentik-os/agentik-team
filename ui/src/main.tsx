@@ -70,7 +70,14 @@ function AppWithProviders() {
 
   if (CLERK_PUBLISHABLE_KEY) {
     return (
-      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+      <ClerkProvider
+        publishableKey={CLERK_PUBLISHABLE_KEY}
+        afterSignOutUrl="/auth"
+        signInUrl="/auth"
+        signUpUrl="/auth"
+        signInFallbackRedirectUrl="/"
+        signUpFallbackRedirectUrl="/"
+      >
         {inner}
       </ClerkProvider>
     );
