@@ -433,7 +433,7 @@ function buildStandardAgentikPayload(
       )
     : [];
 
-  const standardPaperclip: Record<string, unknown> = {
+  const standardAgentik: Record<string, unknown> = {
     runId: ctx.runId,
     companyId: ctx.agent.companyId,
     agentId: ctx.agent.id,
@@ -449,21 +449,21 @@ function buildStandardAgentikPayload(
   };
 
   if (workspace) {
-    standardPaperclip.workspace = workspace;
+    standardAgentik.workspace = workspace;
   }
   if (workspaces.length > 0) {
-    standardPaperclip.workspaces = workspaces;
+    standardAgentik.workspaces = workspaces;
   }
   if (runtimeServiceIntents.length > 0 || Object.keys(configuredWorkspaceRuntime).length > 0) {
-    standardPaperclip.workspaceRuntime = {
+    standardAgentik.workspaceRuntime = {
       ...configuredWorkspaceRuntime,
       ...(runtimeServiceIntents.length > 0 ? { services: runtimeServiceIntents } : {}),
     };
   }
 
   return {
-    ...templatePaperclip,
-    ...standardPaperclip,
+    ...templateAgentik,
+    ...standardAgentik,
   };
 }
 

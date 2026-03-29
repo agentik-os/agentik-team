@@ -3291,7 +3291,7 @@ export function companyPortabilityService(db: Db, storage?: StorageService) {
       manifest: resolved.manifest,
       files: finalFiles,
       warnings: resolved.warnings,
-      agentikExtensionPath,
+      paperclipExtensionPath: agentikExtensionPath,
     };
   }
 

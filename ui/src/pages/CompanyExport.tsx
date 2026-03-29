@@ -782,7 +782,7 @@ export function CompanyExport() {
     const filtered = { ...exportData.files };
 
     // Filter .agentik-team.yaml
-    const yamlPath = exportData.agentikExtensionPath;
+    const yamlPath = exportData.paperclipExtensionPath;
     if (yamlPath && typeof exportData.files[yamlPath] === "string") {
       filtered[yamlPath] = filterAgentikYaml(exportData.files[yamlPath], checkedFiles);
     }

@@ -396,7 +396,7 @@ export function pluginCapabilityValidator(): PluginCapabilityValidator {
 
       // Check feature declarations → required capabilities
       for (const [feature, requiredCap] of Object.entries(FEATURE_CAPABILITIES)) {
-        const featureValue = manifest[feature as keyof Agentik TeamPluginManifestV1];
+        const featureValue = manifest[feature as keyof PaperclipPluginManifestV1];
         if (Array.isArray(featureValue) && featureValue.length > 0) {
           if (!declared.has(requiredCap)) {
             allMissing.push(requiredCap);
