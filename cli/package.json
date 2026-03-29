@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.10.0",
+    "@agentik-os/adapter-agentik-tmux": "workspace:*",
     "@agentik-os/adapter-claude-local": "workspace:*",
     "@agentik-os/adapter-codex-local": "workspace:*",
     "@agentik-os/adapter-cursor-local": "workspace:*",

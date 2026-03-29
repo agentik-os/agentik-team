@@ -78,6 +78,17 @@ import {
   agentConfigurationDoc as hermesAgentConfigurationDoc,
   models as hermesModels,
 } from "hermes-paperclip-adapter";
+import {
+  execute as agentikTmuxExecute,
+  listAgentikTmuxSkills,
+  syncAgentikTmuxSkills,
+  testEnvironment as agentikTmuxTestEnvironment,
+  sessionCodec as agentikTmuxSessionCodec,
+} from "@agentik-os/adapter-agentik-tmux/server";
+import {
+  agentConfigurationDoc as agentikTmuxAgentConfigurationDoc,
+  models as agentikTmuxModels,
+} from "@agentik-os/adapter-agentik-tmux";
 import { processAdapter } from "./process/index.js";
 import { httpAdapter } from "./http/index.js";
 
@@ -187,6 +198,18 @@ const hermesLocalAdapter: ServerAdapterModule = {
   detectModel: () => detectModelFromHermes(),
 };
 
+const agentikTmuxAdapter: ServerAdapterModule = {
+  type: "agentik_tmux",
+  execute: agentikTmuxExecute,
+  testEnvironment: agentikTmuxTestEnvironment,
+  listSkills: listAgentikTmuxSkills,
+  syncSkills: syncAgentikTmuxSkills,
+  sessionCodec: agentikTmuxSessionCodec,
+  models: agentikTmuxModels,
+  supportsLocalAgentJwt: true,
+  agentConfigurationDoc: agentikTmuxAgentConfigurationDoc,
+};
+
 const adaptersByType = new Map<string, ServerAdapterModule>(
   [
     claudeLocalAdapter,
@@ -197,6 +220,7 @@ const adaptersByType = new Map<string, ServerAdapterModule>(
     geminiLocalAdapter,
     openclawGatewayAdapter,
     hermesLocalAdapter,
+    agentikTmuxAdapter,
     processAdapter,
     httpAdapter,
   ].map((a) => [a.type, a]),

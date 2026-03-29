@@ -50,3 +50,11 @@ tests/release-smoke/test-results/
 tests/release-smoke/playwright-report/
 .superset/
 .claude/worktrees/
+.vercel
+
+# Symlinked skills (user-specific paths)
+skills/*
+!skills/agentik-team/
+!skills/agentik-create-agent/
+!skills/agentik-create-plugin/
+!skills/para-memory-files/

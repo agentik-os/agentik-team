@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.888.0",
+    "@agentik-os/adapter-agentik-tmux": "workspace:*",
     "@agentik-os/adapter-claude-local": "workspace:*",
     "@agentik-os/adapter-codex-local": "workspace:*",
     "@agentik-os/adapter-cursor-local": "workspace:*",

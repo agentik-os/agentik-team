@@ -32,6 +32,7 @@
     "@lexical/link": "0.35.0",
     "lexical": "0.35.0",
     "@mdxeditor/editor": "^3.52.4",
+    "@agentik-os/adapter-agentik-tmux": "workspace:*",
     "@agentik-os/adapter-claude-local": "workspace:*",
     "@agentik-os/adapter-codex-local": "workspace:*",
     "@agentik-os/adapter-cursor-local": "workspace:*",
