@@ -15,6 +15,7 @@ import { ToastProvider } from "./context/ToastContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ClerkProvider } from "@clerk/clerk-react";
+import { ClerkTokenProvider } from "./components/ClerkTokenProvider";
 import { initPluginBridge } from "./plugins/bridge-init";
 import { PluginLauncherProvider } from "./plugins/launchers";
 import "@mdxeditor/editor/style.css";
@@ -78,7 +79,9 @@ function AppWithProviders() {
         signInFallbackRedirectUrl="/"
         signUpFallbackRedirectUrl="/"
       >
-        {inner}
+        <ClerkTokenProvider>
+          {inner}
+        </ClerkTokenProvider>
       </ClerkProvider>
     );
   }

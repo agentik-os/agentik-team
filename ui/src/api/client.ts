@@ -1,5 +1,15 @@
 const BASE = "/api";
 
+/**
+ * Clerk token getter — set by ClerkTokenProvider when Clerk is active.
+ * API requests automatically attach the Clerk JWT as a Bearer token.
+ */
+let clerkTokenGetter: (() => Promise<string | null>) | null = null;
+
+export function setClerkTokenGetter(getter: (() => Promise<string | null>) | null) {
+  clerkTokenGetter = getter;
+}
+
 export class ApiError extends Error {
   status: number;
   body: unknown;
@@ -17,6 +27,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const body = init?.body;
   if (!(body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
+  }
+
+  // Inject Clerk Bearer token when available
+  if (clerkTokenGetter && !headers.has("Authorization")) {
+    const token = await clerkTokenGetter();
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
   }
 
   const res = await fetch(`${BASE}${path}`, {
