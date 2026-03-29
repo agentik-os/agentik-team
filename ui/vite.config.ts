@@ -14,6 +14,11 @@ export default defineConfig({
   server: {
     port: 5173,
     allowedHosts: ["CAIO.agentik-os.com", "localhost"],
+    hmr: {
+      host: "CAIO.agentik-os.com",
+      protocol: "wss",
+      clientPort: 443,
+    },
     proxy: {
       "/api": {
         target: "http://localhost:3100",

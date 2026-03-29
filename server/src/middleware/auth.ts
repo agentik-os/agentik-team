@@ -43,7 +43,7 @@ export function actorMiddleware(db: Db, opts: ActorMiddlewareOptions): RequestHa
         }
         if (session?.user?.id) {
           const userId = session.user.id;
-          const [roleRow, memberships] = await Promise.all([
+          let [roleRow, memberships] = await Promise.all([
             db
               .select({ id: instanceUserRoles.id })
               .from(instanceUserRoles)
@@ -60,6 +60,20 @@ export function actorMiddleware(db: Db, opts: ActorMiddlewareOptions): RequestHa
                 ),
               ),
           ]);
+          // Auto-promote first user to instance_admin when no admins exist
+          if (!roleRow) {
+            const anyAdmin = await db
+              .select({ id: instanceUserRoles.id })
+              .from(instanceUserRoles)
+              .where(eq(instanceUserRoles.role, "instance_admin"))
+              .limit(1)
+              .then((rows) => rows[0] ?? null);
+            if (!anyAdmin) {
+              logger.info({ userId }, "No instance admin exists — auto-promoting first authenticated user");
+              await db.insert(instanceUserRoles).values({ userId, role: "instance_admin" }).onConflictDoNothing();
+              roleRow = { id: "auto" };
+            }
+          }
           req.actor = {
             type: "board",
             userId,
@@ -124,7 +138,7 @@ export function actorMiddleware(db: Db, opts: ActorMiddlewareOptions): RequestHa
           updatedAt: now,
         });
       }
-      const [roleRow, memberships] = await Promise.all([
+      let [roleRow, memberships] = await Promise.all([
         db
           .select({ id: instanceUserRoles.id })
           .from(instanceUserRoles)
@@ -141,6 +155,21 @@ export function actorMiddleware(db: Db, opts: ActorMiddlewareOptions): RequestHa
             ),
           ),
       ]);
+
+      // Auto-promote first user to instance_admin when no admins exist
+      if (!roleRow) {
+        const anyAdmin = await db
+          .select({ id: instanceUserRoles.id })
+          .from(instanceUserRoles)
+          .where(eq(instanceUserRoles.role, "instance_admin"))
+          .limit(1)
+          .then((rows) => rows[0] ?? null);
+        if (!anyAdmin) {
+          logger.info({ userId }, "No instance admin exists — auto-promoting first Clerk user");
+          await db.insert(instanceUserRoles).values({ userId, role: "instance_admin" }).onConflictDoNothing();
+          roleRow = { id: "auto" };
+        }
+      }
 
       const companyIdSet = new Set(memberships.map((row) => row.companyId));
 
