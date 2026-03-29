@@ -24,6 +24,24 @@ import {
   resolveHomeAwarePath,
 } from "./home-paths.js";
 
+/**
+ * Read an environment variable with backward-compatible fallback.
+ * Prefers AGENTIK_* but falls back to the legacy PAPERCLIP_* name
+ * with a deprecation warning.
+ */
+function envWithFallback(newKey: string, oldKey: string): string | undefined {
+  const val = process.env[newKey] ?? process.env[oldKey];
+  if (!process.env[newKey] && process.env[oldKey]) {
+    console.warn(`[DEPRECATED] ${oldKey} is deprecated, use ${newKey} instead`);
+  }
+  return val;
+}
+
+/** Shorthand: envWithFallback("AGENTIK_X", "PAPERCLIP_X") */
+function env(suffix: string): string | undefined {
+  return envWithFallback(`AGENTIK_${suffix}`, `PAPERCLIP_${suffix}`);
+}
+
 const AGENTIK_ENV_FILE_PATH = resolvePaperclipEnvPath();
 if (existsSync(AGENTIK_ENV_FILE_PATH)) {
   loadDotenv({ path: AGENTIK_ENV_FILE_PATH, override: false, quiet: true });
@@ -87,13 +105,13 @@ export function loadConfig(): Config {
   const fileDatabaseBackup = fileConfig?.database.backup;
   const fileSecrets = fileConfig?.secrets;
   const fileStorage = fileConfig?.storage;
-  const strictModeFromEnv = process.env.AGENTIK_SECRETS_STRICT_MODE;
+  const strictModeFromEnv = env("SECRETS_STRICT_MODE");
   const secretsStrictMode =
     strictModeFromEnv !== undefined
       ? strictModeFromEnv === "true"
       : (fileSecrets?.strictMode ?? false);
 
-  const providerFromEnvRaw = process.env.AGENTIK_SECRETS_PROVIDER;
+  const providerFromEnvRaw = env("SECRETS_PROVIDER");
   const providerFromEnv =
     providerFromEnvRaw && SECRET_PROVIDERS.includes(providerFromEnvRaw as SecretProvider)
       ? (providerFromEnvRaw as SecretProvider)
@@ -101,33 +119,34 @@ export function loadConfig(): Config {
   const providerFromFile = fileSecrets?.provider;
   const secretsProvider: SecretProvider = providerFromEnv ?? providerFromFile ?? "local_encrypted";
 
-  const storageProviderFromEnvRaw = process.env.AGENTIK_STORAGE_PROVIDER;
+  const storageProviderFromEnvRaw = env("STORAGE_PROVIDER");
   const storageProviderFromEnv =
     storageProviderFromEnvRaw && STORAGE_PROVIDERS.includes(storageProviderFromEnvRaw as StorageProvider)
       ? (storageProviderFromEnvRaw as StorageProvider)
       : null;
   const storageProvider: StorageProvider = storageProviderFromEnv ?? fileStorage?.provider ?? "local_disk";
   const storageLocalDiskBaseDir = resolveHomeAwarePath(
-    process.env.AGENTIK_STORAGE_LOCAL_DIR ??
+    env("STORAGE_LOCAL_DIR") ??
       fileStorage?.localDisk?.baseDir ??
       resolveDefaultStorageDir(),
   );
-  const storageS3Bucket = process.env.AGENTIK_STORAGE_S3_BUCKET ?? fileStorage?.s3?.bucket ?? "paperclip";
-  const storageS3Region = process.env.AGENTIK_STORAGE_S3_REGION ?? fileStorage?.s3?.region ?? "us-east-1";
-  const storageS3Endpoint = process.env.AGENTIK_STORAGE_S3_ENDPOINT ?? fileStorage?.s3?.endpoint ?? undefined;
-  const storageS3Prefix = process.env.AGENTIK_STORAGE_S3_PREFIX ?? fileStorage?.s3?.prefix ?? "";
+  const storageS3Bucket = env("STORAGE_S3_BUCKET") ?? fileStorage?.s3?.bucket ?? "paperclip";
+  const storageS3Region = env("STORAGE_S3_REGION") ?? fileStorage?.s3?.region ?? "us-east-1";
+  const storageS3Endpoint = env("STORAGE_S3_ENDPOINT") ?? fileStorage?.s3?.endpoint ?? undefined;
+  const storageS3Prefix = env("STORAGE_S3_PREFIX") ?? fileStorage?.s3?.prefix ?? "";
+  const s3ForcePathStyleVal = env("STORAGE_S3_FORCE_PATH_STYLE");
   const storageS3ForcePathStyle =
-    process.env.AGENTIK_STORAGE_S3_FORCE_PATH_STYLE !== undefined
-      ? process.env.AGENTIK_STORAGE_S3_FORCE_PATH_STYLE === "true"
+    s3ForcePathStyleVal !== undefined
+      ? s3ForcePathStyleVal === "true"
       : (fileStorage?.s3?.forcePathStyle ?? false);
 
-  const deploymentModeFromEnvRaw = process.env.AGENTIK_DEPLOYMENT_MODE;
+  const deploymentModeFromEnvRaw = env("DEPLOYMENT_MODE");
   const deploymentModeFromEnv =
     deploymentModeFromEnvRaw && DEPLOYMENT_MODES.includes(deploymentModeFromEnvRaw as DeploymentMode)
       ? (deploymentModeFromEnvRaw as DeploymentMode)
       : null;
   const deploymentMode: DeploymentMode = deploymentModeFromEnv ?? fileConfig?.server.deploymentMode ?? "local_trusted";
-  const deploymentExposureFromEnvRaw = process.env.AGENTIK_DEPLOYMENT_EXPOSURE;
+  const deploymentExposureFromEnvRaw = env("DEPLOYMENT_EXPOSURE");
   const deploymentExposureFromEnv =
     deploymentExposureFromEnvRaw &&
     DEPLOYMENT_EXPOSURES.includes(deploymentExposureFromEnvRaw as DeploymentExposure)
@@ -137,15 +156,15 @@ export function loadConfig(): Config {
     deploymentMode === "local_trusted"
       ? "private"
       : (deploymentExposureFromEnv ?? fileConfig?.server.exposure ?? "private");
-  const authBaseUrlModeFromEnvRaw = process.env.AGENTIK_AUTH_BASE_URL_MODE;
+  const authBaseUrlModeFromEnvRaw = env("AUTH_BASE_URL_MODE");
   const authBaseUrlModeFromEnv =
     authBaseUrlModeFromEnvRaw &&
     AUTH_BASE_URL_MODES.includes(authBaseUrlModeFromEnvRaw as AuthBaseUrlMode)
       ? (authBaseUrlModeFromEnvRaw as AuthBaseUrlMode)
       : null;
-  const publicUrlFromEnv = process.env.AGENTIK_PUBLIC_URL;
+  const publicUrlFromEnv = env("PUBLIC_URL");
   const authPublicBaseUrlRaw =
-    process.env.AGENTIK_AUTH_PUBLIC_BASE_URL ??
+    env("AUTH_PUBLIC_BASE_URL") ??
     process.env.BETTER_AUTH_URL ??
     process.env.BETTER_AUTH_BASE_URL ??
     publicUrlFromEnv ??
@@ -155,12 +174,12 @@ export function loadConfig(): Config {
     authBaseUrlModeFromEnv ??
     fileConfig?.auth?.baseUrlMode ??
     (authPublicBaseUrl ? "explicit" : "auto");
-  const disableSignUpFromEnv = process.env.AGENTIK_AUTH_DISABLE_SIGN_UP;
+  const disableSignUpFromEnv = env("AUTH_DISABLE_SIGN_UP");
   const authDisableSignUp: boolean =
     disableSignUpFromEnv !== undefined
       ? disableSignUpFromEnv === "true"
       : (fileConfig?.auth?.disableSignUp ?? false);
-  const allowedHostnamesFromEnvRaw = process.env.AGENTIK_ALLOWED_HOSTNAMES;
+  const allowedHostnamesFromEnvRaw = env("ALLOWED_HOSTNAMES");
   const allowedHostnamesFromEnv = allowedHostnamesFromEnvRaw
     ? allowedHostnamesFromEnvRaw
       .split(",")
@@ -186,29 +205,30 @@ export function loadConfig(): Config {
         .filter(Boolean),
     ),
   );
-  const companyDeletionEnvRaw = process.env.AGENTIK_ENABLE_COMPANY_DELETION;
+  const companyDeletionEnvRaw = env("ENABLE_COMPANY_DELETION");
   const companyDeletionEnabled =
     companyDeletionEnvRaw !== undefined
       ? companyDeletionEnvRaw === "true"
       : deploymentMode === "local_trusted";
+  const dbBackupEnabledVal = env("DB_BACKUP_ENABLED");
   const databaseBackupEnabled =
-    process.env.AGENTIK_DB_BACKUP_ENABLED !== undefined
-      ? process.env.AGENTIK_DB_BACKUP_ENABLED === "true"
+    dbBackupEnabledVal !== undefined
+      ? dbBackupEnabledVal === "true"
       : (fileDatabaseBackup?.enabled ?? true);
   const databaseBackupIntervalMinutes = Math.max(
     1,
-    Number(process.env.AGENTIK_DB_BACKUP_INTERVAL_MINUTES) ||
+    Number(env("DB_BACKUP_INTERVAL_MINUTES")) ||
       fileDatabaseBackup?.intervalMinutes ||
       60,
   );
   const databaseBackupRetentionDays = Math.max(
     1,
-    Number(process.env.AGENTIK_DB_BACKUP_RETENTION_DAYS) ||
+    Number(env("DB_BACKUP_RETENTION_DAYS")) ||
       fileDatabaseBackup?.retentionDays ||
       30,
   );
   const databaseBackupDir = resolveHomeAwarePath(
-    process.env.AGENTIK_DB_BACKUP_DIR ??
+    env("DB_BACKUP_DIR") ??
       fileDatabaseBackup?.dir ??
       resolveDefaultBackupDir(),
   );
@@ -236,12 +256,12 @@ export function loadConfig(): Config {
       process.env.SERVE_UI !== undefined
         ? process.env.SERVE_UI === "true"
         : fileConfig?.server.serveUi ?? true,
-    uiDevMiddleware: process.env.AGENTIK_UI_DEV_MIDDLEWARE === "true",
+    uiDevMiddleware: env("UI_DEV_MIDDLEWARE") === "true",
     secretsProvider,
     secretsStrictMode,
     secretsMasterKeyFilePath:
       resolveHomeAwarePath(
-        process.env.AGENTIK_SECRETS_MASTER_KEY_FILE ??
+        env("SECRETS_MASTER_KEY_FILE") ??
           fileSecrets?.localEncrypted.keyFilePath ??
           resolveDefaultSecretsKeyFilePath(),
       ),
