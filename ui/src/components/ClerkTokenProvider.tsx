@@ -1,19 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { setClerkTokenGetter } from "../api/client";
 
 /**
  * Bridges Clerk auth into the API client.
- * Registers a token getter so every API request automatically
- * includes the Clerk JWT as a Bearer token.
+ * Uses a ref to always capture the latest getToken function,
+ * so API requests always get a fresh token even if Clerk's
+ * session state changes.
  */
 export function ClerkTokenProvider({ children }: { children: React.ReactNode }) {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn, isLoaded } = useAuth();
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
 
   useEffect(() => {
-    setClerkTokenGetter(() => getToken());
+    if (isLoaded && isSignedIn) {
+      setClerkTokenGetter(() => getTokenRef.current());
+    } else if (isLoaded && !isSignedIn) {
+      setClerkTokenGetter(null);
+    }
     return () => setClerkTokenGetter(null);
-  }, [getToken]);
+  }, [isLoaded, isSignedIn]);
 
   return <>{children}</>;
 }
