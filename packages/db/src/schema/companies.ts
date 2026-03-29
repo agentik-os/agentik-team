@@ -1,4 +1,5 @@
 import { pgTable, uuid, text, integer, timestamp, boolean, uniqueIndex } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const companies = pgTable(
   "companies",
@@ -17,10 +18,14 @@ export const companies = pgTable(
       .notNull()
       .default(true),
     brandColor: text("brand_color"),
+    clerkOrgId: text("clerk_org_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     issuePrefixUniqueIdx: uniqueIndex("companies_issue_prefix_idx").on(table.issuePrefix),
+    clerkOrgIdUniqueIdx: uniqueIndex("companies_clerk_org_id_idx")
+      .on(table.clerkOrgId)
+      .where(sql`${table.clerkOrgId} IS NOT NULL`),
   }),
 );

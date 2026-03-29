@@ -1,5 +1,7 @@
 import { and, count, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import type { Db } from "@agentik-os/db";
+import { clerk } from "../auth/clerk.js";
+import { logger } from "../middleware/logger.js";
 import {
   companies,
   companyLogos,
@@ -36,12 +38,15 @@ export function companyService(db: Db) {
     name: companies.name,
     description: companies.description,
     status: companies.status,
+    pauseReason: companies.pauseReason,
+    pausedAt: companies.pausedAt,
     issuePrefix: companies.issuePrefix,
     issueCounter: companies.issueCounter,
     budgetMonthlyCents: companies.budgetMonthlyCents,
     spentMonthlyCents: companies.spentMonthlyCents,
     requireBoardApprovalForNewAgents: companies.requireBoardApprovalForNewAgents,
     brandColor: companies.brandColor,
+    clerkOrgId: companies.clerkOrgId,
     logoAssetId: companyLogos.assetId,
     createdAt: companies.createdAt,
     updatedAt: companies.updatedAt,
@@ -162,8 +167,25 @@ export function companyService(db: Db) {
       return enrichCompany(hydrated);
     },
 
-    create: async (data: typeof companies.$inferInsert) => {
+    create: async (data: typeof companies.$inferInsert, creatorUserId?: string) => {
       const created = await createCompanyWithUniquePrefix(data);
+
+      // Create a matching Clerk Organization if Clerk is configured
+      if (clerk && creatorUserId) {
+        try {
+          const org = await clerk.organizations.createOrganization({
+            name: data.name,
+            createdBy: creatorUserId,
+          });
+          await db
+            .update(companies)
+            .set({ clerkOrgId: org.id })
+            .where(eq(companies.id, created.id));
+        } catch (err) {
+          logger.warn({ err }, "Failed to create Clerk organization for company");
+        }
+      }
+
       const row = await getCompanyQuery(db)
         .where(eq(companies.id, created.id))
         .then((rows) => rows[0] ?? null);
@@ -243,6 +265,20 @@ export function companyService(db: Db) {
           .returning()
           .then((rows) => rows[0] ?? null);
         if (!updated) return null;
+
+        // Delete the Clerk Organization when archiving
+        if (clerk && updated.clerkOrgId) {
+          try {
+            await clerk.organizations.deleteOrganization(updated.clerkOrgId);
+            await tx
+              .update(companies)
+              .set({ clerkOrgId: null })
+              .where(eq(companies.id, id));
+          } catch (err) {
+            logger.warn({ err, companyId: id }, "Failed to delete Clerk organization on archive");
+          }
+        }
+
         const row = await getCompanyQuery(tx)
           .where(eq(companies.id, id))
           .then((rows) => rows[0] ?? null);
@@ -253,6 +289,20 @@ export function companyService(db: Db) {
 
     remove: (id: string) =>
       db.transaction(async (tx) => {
+        // Delete the Clerk Organization before removing the company
+        const existing = await tx
+          .select({ clerkOrgId: companies.clerkOrgId })
+          .from(companies)
+          .where(eq(companies.id, id))
+          .then((rows) => rows[0] ?? null);
+        if (clerk && existing?.clerkOrgId) {
+          try {
+            await clerk.organizations.deleteOrganization(existing.clerkOrgId);
+          } catch (err) {
+            logger.warn({ err, companyId: id }, "Failed to delete Clerk organization on remove");
+          }
+        }
+
         // Delete from child tables in dependency order
         await tx.delete(heartbeatRunEvents).where(eq(heartbeatRunEvents.companyId, id));
         await tx.delete(agentTaskSessions).where(eq(agentTaskSessions.companyId, id));

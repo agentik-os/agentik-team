@@ -20,6 +20,8 @@ import {
 } from "../services/index.js";
 import type { StorageService } from "../storage/types.js";
 import { assertBoard, assertCompanyAccess, getActorInfo } from "./authz.js";
+import { clerk } from "../auth/clerk.js";
+import { logger } from "../middleware/logger.js";
 
 export function companyRoutes(db: Db, storage?: StorageService) {
   const router = Router();
@@ -215,8 +217,22 @@ export function companyRoutes(db: Db, storage?: StorageService) {
     if (!(req.actor.source === "local_implicit" || req.actor.isInstanceAdmin)) {
       throw forbidden("Instance admin required");
     }
-    const company = await svc.create(req.body);
+    const company = await svc.create(req.body, req.actor.userId ?? undefined);
     await access.ensureMembership(company.id, "user", req.actor.userId ?? "local-board", "owner", "active");
+
+    // Add the creating user to the Clerk Organization
+    if (clerk && company.clerkOrgId && req.actor.userId) {
+      try {
+        await clerk.organizations.createOrganizationMembership({
+          organizationId: company.clerkOrgId,
+          userId: req.actor.userId,
+          role: "org:admin",
+        });
+      } catch (err) {
+        logger.warn({ err }, "Failed to add creator to Clerk organization membership");
+      }
+    }
+
     await logActivity(db, {
       companyId: company.id,
       actorType: "user",

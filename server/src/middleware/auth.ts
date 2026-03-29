@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto";
 import type { Request, RequestHandler } from "express";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import type { Db } from "@agentik-os/db";
-import { agentApiKeys, agents, authUsers, companyMemberships, instanceUserRoles } from "@agentik-os/db";
+import { agentApiKeys, agents, authUsers, companies, companyMemberships, instanceUserRoles } from "@agentik-os/db";
 import { verifyLocalAgentJwt } from "../agent-auth-jwt.js";
 import type { DeploymentMode } from "@agentik-os/shared";
 import type { BetterAuthSessionResult } from "../auth/better-auth.js";
-import { verifyClerkSession } from "../auth/clerk.js";
+import { clerk, verifyClerkSession } from "../auth/clerk.js";
 import { logger } from "./logger.js";
 import { boardAuthService } from "../services/board-auth.js";
 
@@ -141,10 +141,32 @@ export function actorMiddleware(db: Db, opts: ActorMiddlewareOptions): RequestHa
             ),
           ),
       ]);
+
+      const companyIdSet = new Set(memberships.map((row) => row.companyId));
+
+      // Also resolve company access from Clerk org memberships
+      if (clerk) {
+        try {
+          const orgMemberships = await clerk.users.getOrganizationMembershipList({ userId });
+          if (orgMemberships.data?.length) {
+            const clerkOrgIds = orgMemberships.data.map((m) => m.organization.id);
+            const orgCompanies = await db
+              .select({ id: companies.id, clerkOrgId: companies.clerkOrgId })
+              .from(companies)
+              .where(inArray(companies.clerkOrgId, clerkOrgIds));
+            for (const row of orgCompanies) {
+              companyIdSet.add(row.id);
+            }
+          }
+        } catch (err) {
+          logger.warn({ err, userId }, "Failed to resolve Clerk org memberships for company access");
+        }
+      }
+
       req.actor = {
         type: "board",
         userId,
-        companyIds: memberships.map((row) => row.companyId),
+        companyIds: Array.from(companyIdSet),
         isInstanceAdmin: Boolean(roleRow),
         runId: runIdHeader ?? undefined,
         source: "clerk_session",
